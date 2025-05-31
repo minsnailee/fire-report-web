@@ -7,7 +7,8 @@ import com.firemap.backend.repository.ReportRepository;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReportService {
@@ -19,10 +20,10 @@ public class ReportService {
     }
 
     public void saveReport(ReportDto dto) {
-        // ISO 8601 String → LocalDateTime 변환
         LocalDateTime timestamp = OffsetDateTime.parse(dto.getTimestamp()).toLocalDateTime();
 
         ReportEntity entity = new ReportEntity(
+            null, // ID는 자동 생성
             dto.getReporterLatitude(),
             dto.getReporterLongitude(),
             dto.getFireLatitude(),
@@ -31,5 +32,18 @@ public class ReportService {
         );
 
         reportRepository.save(entity);
+    }
+
+    public List<ReportDto> getAllReports() {
+        return reportRepository.findAll().stream()
+            .map(entity -> new ReportDto(
+                entity.getId(),
+                entity.getReporterLatitude(),
+                entity.getReporterLongitude(),
+                entity.getFireLatitude(),
+                entity.getFireLongitude(),
+                entity.getTimestamp().toString()
+            ))
+            .collect(Collectors.toList());
     }
 }

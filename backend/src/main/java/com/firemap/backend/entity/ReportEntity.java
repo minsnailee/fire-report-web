@@ -1,10 +1,16 @@
 package com.firemap.backend.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reports")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReportEntity {
 
     @Id
@@ -17,20 +23,4 @@ public class ReportEntity {
     private double fireLongitude;
 
     private LocalDateTime timestamp;
-
-    // 기본 생성자
-    public ReportEntity() {}
-
-    // 생성자 편의 메서드 (DTO 변환용)
-    public ReportEntity(double reporterLatitude, double reporterLongitude,
-                        double fireLatitude, double fireLongitude,
-                        LocalDateTime timestamp) {
-        this.reporterLatitude = reporterLatitude;
-        this.reporterLongitude = reporterLongitude;
-        this.fireLatitude = fireLatitude;
-        this.fireLongitude = fireLongitude;
-        this.timestamp = timestamp;
-    }
-
-    // getter / setter 생략 (IDE 자동생성 추천)
 }

@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.*;
 import com.firemap.backend.dto.ReportDto;
 import com.firemap.backend.service.ReportService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/reports")
-@CrossOrigin(origins = "*") // 개발용, CORS 허용
+@CrossOrigin(origins = "*")
 public class ReportController {
 
     private final ReportService reportService;
@@ -17,6 +19,7 @@ public class ReportController {
         this.reportService = reportService;
     }
 
+    // POST: 신고 저장
     @PostMapping
     public ResponseEntity<String> receiveReport(@RequestBody ReportDto report) {
         System.out.println("🚨 화재 신고 수신:");
@@ -26,8 +29,13 @@ public class ReportController {
 
         reportService.saveReport(report);
 
-        // 👉 여기서 DB 저장, 알림 발송 등의 로직을 추가할 수 있음
-
         return ResponseEntity.ok("신고 접수 및 저장 완료");
+    }
+
+    // GET: 신고 내역 전체 조회
+    @GetMapping
+    public ResponseEntity<List<ReportDto>> getAllReports() {
+        List<ReportDto> reports = reportService.getAllReports();
+        return ResponseEntity.ok(reports);
     }
 }
