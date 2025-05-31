@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 
-function MapPage() {
+function FireMap() {
    const KAKAO_MAP_KEY = import.meta.env.VITE_KAKAO_MAP_KEY;
    const mapRef = useRef(null);
    const [map, setMap] = useState(null);
@@ -242,4 +242,4 @@ function MapPage() {
    );
 }
 
-export default MapPage;
+export default FireMap;
