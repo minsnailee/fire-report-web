@@ -53,28 +53,27 @@ function DashboardPage() {
                   <th>화재 위도</th>
                   <th>화재 경도</th>
                   <th>시간</th>
-                  <th>출동지시</th>
+                  <th>상태</th>
                   <th>상세보기</th>
+                  <th>출동지시</th>
                </tr>
             </thead>
             <tbody>
                {reports.map((report) => (
                   <tr key={report.id}>
                      <td>{report.id}</td>
-                     <td>
-                        {report.reporterLatitude.toFixed(4)},{" "}
-                        {report.reporterLongitude.toFixed(4)}
-                     </td>
-                     <td>
-                        {report.fireLatitude.toFixed(4)},{" "}
-                        {report.fireLongitude.toFixed(4)}
-                     </td>
+                     <td>{report.reporterLatitude.toFixed(4)}</td>
+                     <td>{report.reporterLongitude.toFixed(4)}</td>
+                     <td>{report.fireLatitude.toFixed(4)}</td>
+                     <td>{report.fireLongitude.toFixed(4)}</td>
                      <td>{new Date(report.timestamp).toLocaleString()}</td>
                      <td>{report.status || "대기중"}</td>
                      <td>
                         <button onClick={() => setSelectedReport(report)}>
                            상세보기
                         </button>{" "}
+                     </td>
+                     <td>
                         <button onClick={() => handleDispatch(report.id)}>
                            출동지시
                         </button>

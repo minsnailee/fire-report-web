@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class MainController {
     @GetMapping("/")
     public String home() {
-        return "Hello, Firemap Backend is running!";
+        return "fire report web backend";
     }
 }
