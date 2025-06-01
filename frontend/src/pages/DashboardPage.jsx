@@ -12,7 +12,7 @@ function DashboardPage() {
       // 신고 목록 불러오기
       const fetchReports = async () => {
          try {
-            const response = await axios.get(`${apiUrl}/reports`);
+            const response = await axios.get(`${apiUrl}/fire-reports`);
             setReports(response.data);
          } catch (error) {
             console.error("❌ 신고 목록 불러오기 실패", error);
@@ -165,7 +165,7 @@ function DashboardPage() {
          case "resolved":
             return "종료";
          default:
-            return "대기중";
+            return "신고 접수됨";
       }
    }
 }

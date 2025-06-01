@@ -28,7 +28,7 @@ public class FireReportController {
     }
 
     @GetMapping
-    public List<FireReportDto> getReports() {
-        return fireReportService.getAllReports();
+    public List<FireReportDto> getFireReports() {
+        return fireReportService.getAllFireReports();
     }
 }

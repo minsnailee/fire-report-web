@@ -107,7 +107,7 @@ public class FireReportService {
     }
 
 
-    public List<FireReportDto> getAllReports() {
+    public List<FireReportDto> getAllFireReports() {
         return reportRepository.findAll().stream().map(report -> new FireReportDto(
             report.getId(),
             null, // reportedId
