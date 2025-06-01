@@ -13,8 +13,9 @@ function FireMap() {
    const [accuracyInfo, setAccuracyInfo] = useState("");
    const [token, setToken] = useState("");
    const [reporterAddress, setReporterAddress] = useState("");
+   const [fireAddress, setFireAddress] = useState("");
    const [kakaoReady, setKakaoReady] = useState(false);
-   // 1. URL 쿼리에서 token 파싱 및 검증
+
    useEffect(() => {
       const params = new URLSearchParams(window.location.search);
       const tokenFromUrl = params.get("token") || "";
@@ -36,7 +37,6 @@ function FireMap() {
       }
    }, [apiUrl]);
 
-   // 2. 카카오맵 초기화
    useEffect(() => {
       const script = document.createElement("script");
       script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_KEY}&autoload=false&libraries=services`;
@@ -62,7 +62,7 @@ function FireMap() {
                }
             );
 
-            setKakaoReady(true); // 카카오맵 완전히 준비됨 표시
+            setKakaoReady(true);
          });
       };
 
@@ -71,14 +71,11 @@ function FireMap() {
       };
 
       document.head.appendChild(script);
-
-      // cleanup: 스크립트 제거
       return () => {
          document.head.removeChild(script);
       };
    }, [KAKAO_MAP_KEY]);
 
-   // 3. 신고자 현재 위치 가져오기
    useEffect(() => {
       if (!map) return;
 
@@ -116,7 +113,6 @@ function FireMap() {
       );
    }, [map]);
 
-   // 4. 위치 새로고침
    const refreshLocation = () => {
       if (!navigator.geolocation) {
          alert("브라우저가 위치 정보를 지원하지 않습니다.");
@@ -147,13 +143,11 @@ function FireMap() {
       );
    };
 
-   // 주소 조회 코드
+   // 신고자 위치 역지오코딩 부분
    useEffect(() => {
       if (!reporterPos) return;
-      if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
-         console.warn("카카오 지도 서비스가 준비되지 않았습니다.");
+      if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services)
          return;
-      }
 
       const geocoder = new window.kakao.maps.services.Geocoder();
 
@@ -161,9 +155,6 @@ function FireMap() {
          reporterPos.getLng(),
          reporterPos.getLat(),
          (result, status) => {
-            if (import.meta.env.MODE === "development") {
-               console.log("주소 조회 결과:", result, status);
-            }
             if (status === window.kakao.maps.services.Status.OK) {
                const address =
                   result[0]?.address?.address_name || "주소 정보 없음";
@@ -177,7 +168,27 @@ function FireMap() {
       );
    }, [reporterPos]);
 
-   // 신고처리 (token을 reportedId 필드로 보냄)
+   // 화재 위치 주소 역지오코딩
+   useEffect(() => {
+      if (!kakaoReady || !centerPos) return;
+
+      const geocoder = new window.kakao.maps.services.Geocoder();
+
+      geocoder.coord2Address(
+         centerPos.getLng(),
+         centerPos.getLat(),
+         (result, status) => {
+            if (status === window.kakao.maps.services.Status.OK) {
+               const address =
+                  result[0]?.address?.address_name || "주소 정보 없음";
+               setFireAddress(address);
+            } else {
+               setFireAddress("주소 정보 조회 실패");
+            }
+         }
+      );
+   }, [centerPos, kakaoReady]);
+
    const handleSubmit = async () => {
       if (!map || !reporterPos || !centerPos) {
          alert("지도와 위치 정보를 모두 확인해주세요.");
@@ -190,34 +201,21 @@ function FireMap() {
       }
 
       const payload = {
-         reportedId: token, // URL 토큰을 reportedId로 사용
-         lat: centerPos.getLat(),
-         lng: centerPos.getLng(),
-         address: reporterAddress || "주소 미입력",
+         reportedId: token,
+         fireLat: centerPos.getLat(),
+         fireLng: centerPos.getLng(),
+         fireAddress: fireAddress || "주소 미입력",
+         reporterLat: reporterPos.getLat(),
+         reporterLng: reporterPos.getLng(),
+         reporterAddress: reporterAddress || "주소 미입력",
          status: "REPORTED",
          reportedAt: dayjs().format("YYYY-MM-DD[T]HH:mm:ss"),
          dispatchedAt: null,
          resolvedAt: null,
       };
 
-      // **디버깅용 로그 추가 (주석 해제 및 보강)**
-      // console.log("🔥 [전송 직전] payload:", payload);
-      // console.log("🔑 [전송 직전] token (reportedId):", token);
-      // console.log(
-      //    "🧍‍♂️ 신고자 위치 (reporterPos):",
-      //    reporterPos?.getLat(),
-      //    reporterPos?.getLng()
-      // );
-      // console.log(
-      //    "🔥 화재 위치 (centerPos):",
-      //    centerPos?.getLat(),
-      //    centerPos?.getLng()
-      // );
-      console.log("reportedId가 제대로 있는지 확인", JSON.stringify(payload));
-
       try {
          const response = await axios.post(`${apiUrl}/fire-reports`, payload);
-
          console.log("✅ 서버 응답:", response.data);
          alert("신고 위치가 전송되었습니다!");
       } catch (error) {
@@ -227,24 +225,12 @@ function FireMap() {
          );
          alert("신고 전송에 실패했습니다.");
       }
-
-      // if (import.meta.env.MODE === "development") {
-      //    console.log(
-      //       "🚨 신고자 위치:",
-      //       reporterPos.getLat(),
-      //       reporterPos.getLng()
-      //    );
-      //    console.log("🔥 화재 위치:", centerPos.getLat(), centerPos.getLng());
-      //    console.log("🔑 reportedId (token):", token);
-      //    console.log("전송 payload:", payload);
-      // }
    };
 
    return (
       <div style={{ padding: "1rem", position: "relative" }}>
          <h2>📍 화재 신고 위치 선택</h2>
 
-         {/* 지도 */}
          <div
             id="map"
             style={{
@@ -255,7 +241,7 @@ function FireMap() {
             }}
          ></div>
 
-         {/* 🔴 고정된 마커 (화재 위치) */}
+         {/* 🔴 고정 마커 */}
          <div
             style={{
                position: "absolute",
@@ -276,7 +262,6 @@ function FireMap() {
             />
          </div>
 
-         {/* 신고자 위치 정보 */}
          <div style={{ marginTop: "1rem" }}>
             <p>🧍‍♂️ 신고자 위치 (GPS)</p>
             {reporterPos && (
@@ -293,7 +278,6 @@ function FireMap() {
             <button onClick={refreshLocation}>🔄 위치 새로고침</button>
          </div>
 
-         {/* 화재 위치 정보 */}
          <div style={{ marginTop: "1rem" }}>
             <p>🔥 화재 발생 위치 (지도 중심)</p>
             {centerPos && (
@@ -302,12 +286,16 @@ function FireMap() {
                   {centerPos.getLng().toFixed(6)}
                </p>
             )}
+            {fireAddress && (
+               <p style={{ fontSize: "0.9em", color: "#666" }}>
+                  주소: {fireAddress}
+               </p>
+            )}
             <p style={{ fontSize: "0.9em", color: "#666" }}>
                👉 지도를 움직여 화재 위치를 조정하세요.
             </p>
          </div>
 
-         {/* 신고 버튼 */}
          <button
             onClick={handleSubmit}
             style={{ marginTop: "1rem", padding: "0.5rem 1rem" }}

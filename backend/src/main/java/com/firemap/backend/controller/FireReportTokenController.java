@@ -2,7 +2,7 @@ package com.firemap.backend.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.firemap.backend.entity.FireReportToken;
+import com.firemap.backend.entity.FireReportTokenEntity;
 import com.firemap.backend.service.FireReportTokenService;
 
 @CrossOrigin(origins = "*")
@@ -19,7 +19,7 @@ public class FireReportTokenController {
     // 토큰 생성 API (관제센터에서 URL 생성할 때 호출)
     @PostMapping("/create")
     public ResponseEntity<String> createToken() {
-        FireReportToken token = tokenService.createToken();
+        FireReportTokenEntity token = tokenService.createToken();
         return ResponseEntity.ok(token.getToken());
     }
 

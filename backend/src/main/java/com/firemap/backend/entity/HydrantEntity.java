@@ -22,8 +22,8 @@ public class HydrantEntity {
     @Column(nullable = false)
     private double lng;
 
-    @Column(columnDefinition = "TEXT")
-    private String address;
+    // @Column(columnDefinition = "TEXT")
+    // private String address;
 
     @Column(nullable = false)
     private boolean usable;

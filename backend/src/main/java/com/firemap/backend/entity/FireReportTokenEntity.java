@@ -28,7 +28,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FireReportToken {
+public class FireReportTokenEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

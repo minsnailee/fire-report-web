@@ -3,7 +3,7 @@ package com.firemap.backend.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.firemap.backend.entity.FireReportToken;
+import com.firemap.backend.entity.FireReportTokenEntity;
 import com.firemap.backend.repository.FireReportTokenRepository;
 
 import java.util.UUID;
@@ -19,9 +19,9 @@ public class FireReportTokenService {
     }
 
     // 새로운 토큰 생성 및 저장
-    public FireReportToken createToken() {
+    public FireReportTokenEntity createToken() {
         String token = UUID.randomUUID().toString();
-        FireReportToken fireReportToken = FireReportToken.builder()
+        FireReportTokenEntity fireReportToken = FireReportTokenEntity.builder()
             .token(token)
             .build();
         return tokenRepository.save(fireReportToken);

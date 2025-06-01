@@ -23,7 +23,7 @@ public class HydrantService {
         HydrantEntity entity = HydrantEntity.builder()
                 .lat(dto.getLat())
                 .lng(dto.getLng())
-                .address(dto.getAddress())
+                // .address(dto.getAddress())
                 .usable(dto.isUsable())
                 .build();
 
@@ -38,7 +38,7 @@ public class HydrantService {
                         entity.getId(),
                         entity.getLat(),
                         entity.getLng(),
-                        entity.getAddress(),
+                        // entity.getAddress(),
                         entity.isUsable()
                 ))
                 .collect(Collectors.toList());

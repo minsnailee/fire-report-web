@@ -23,7 +23,7 @@ public class FireReportService {
     }
 
     public FireReportDto saveReport(FireReportRequest request) {
-        FireReportToken token = tokenRepository.findByToken(request.getReportedId())
+        FireReportTokenEntity token = tokenRepository.findByToken(request.getReportedId())
             .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 토큰입니다."));
 
         // 토큰으로 기존 신고가 있는지 확인
@@ -33,9 +33,15 @@ public class FireReportService {
             // 최초 저장 (신고 새로 생성)
             report = FireReportEntity.builder()
                 .reportToken(token)
-                .lat(request.getLat())
-                .lng(request.getLng())
-                .address(request.getAddress())
+                // .lat(request.getLat())
+                // .lng(request.getLng())
+                // .address(request.getAddress())
+                .reporterLat(request.getReporterLat())
+                .reporterLng(request.getReporterLng())
+                .fireLat(request.getFireLat())
+                .fireLng(request.getFireLng())
+                .reporterAddress(request.getReporterAddress())
+                .fireAddress(request.getFireAddress())
                 .status(FireReportStatus.valueOf(request.getStatus().toUpperCase()))
                 .reportedAt(request.getReportedAt())
                 .dispatchedAt(request.getDispatchedAt())
@@ -43,9 +49,15 @@ public class FireReportService {
                 .build();
         } else {
             // 기존 신고 수정
-            report.setLat(request.getLat());
-            report.setLng(request.getLng());
-            report.setAddress(request.getAddress());
+            // report.setLat(request.getLat());
+            // report.setLng(request.getLng());
+            // report.setAddress(request.getAddress());
+            report.setReporterLat(request.getReporterLat());
+            report.setReporterLng(request.getReporterLng());
+            report.setFireLat(request.getFireLat());
+            report.setFireLng(request.getFireLng());
+            report.setReporterAddress(request.getReporterAddress());
+            report.setFireAddress(request.getFireAddress());
             report.setStatus(FireReportStatus.valueOf(request.getStatus().toUpperCase()));
             report.setReportedAt(request.getReportedAt());
             report.setDispatchedAt(request.getDispatchedAt());
@@ -73,9 +85,15 @@ public class FireReportService {
             return new FireReportDto(
                 saved.getId(),
                 null,
-                saved.getLat(),
-                saved.getLng(),
-                saved.getAddress(),
+                // saved.getLat(),
+                // saved.getLng(),
+                // saved.getAddress(),
+                saved.getReporterLat(),
+                saved.getReporterLng(),
+                saved.getFireLat(),
+                saved.getFireLng(),
+                saved.getReporterAddress(),
+                saved.getFireAddress(),
                 saved.getStatus(), // String → enum 으로 잘 바뀜
                 saved.getReportedAt(),
                 saved.getDispatchedAt(),
@@ -93,9 +111,15 @@ public class FireReportService {
         return reportRepository.findAll().stream().map(report -> new FireReportDto(
             report.getId(),
             null, // reportedId
-            report.getLat(),
-            report.getLng(),
-            report.getAddress(),
+            // report.getLat(),
+            // report.getLng(),
+            // report.getAddress(),
+            report.getReporterLat(),
+            report.getReporterLng(),
+            report.getFireLat(),
+            report.getFireLng(),
+            report.getReporterAddress(),
+            report.getFireAddress(),
             report.getStatus(), // FireReportStatus 그대로 넘김
             report.getReportedAt(),
             report.getDispatchedAt(),

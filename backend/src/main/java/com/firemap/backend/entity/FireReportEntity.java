@@ -23,22 +23,33 @@ public class FireReportEntity {
     // private UserEntity reporter;
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "report_token_id", nullable = false)
-    private FireReportToken reportToken;
+    private FireReportTokenEntity reportToken;
+
+    // @Column(nullable = false)
+    // private double lat;
+
+    // @Column(nullable = false)
+    // private double lng;
+
+    // @Column(columnDefinition = "TEXT", nullable = false)
+    // private String address;
+    @Column(nullable = false)
+    private double reporterLat;
 
     @Column(nullable = false)
-    private double lat;
+    private double reporterLng;
 
     @Column(nullable = false)
-    private double lng;
+    private double fireLat;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String address;
-    
-    // @Column(name = "reporter_address", columnDefinition = "TEXT", nullable = false)
-    // private String reporterAddress; // 신고자 현재 위치 주소
+    @Column(nullable = false)
+    private double fireLng;
 
-    // @Column(name = "fire_address", columnDefinition = "TEXT", nullable = false)
-    // private String fireAddress; // 화재 발생 위치 주소
+    @Column(name = "reporter_address", columnDefinition = "TEXT", nullable = false)
+    private String reporterAddress; // 신고자 현재 위치 주소
+
+    @Column(name = "fire_address", columnDefinition = "TEXT", nullable = false)
+    private String fireAddress; // 화재 발생 위치 주소
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
