@@ -62,67 +62,124 @@ function DashboardPage() {
    };
 
    return (
-      <div style={{ padding: "1rem" }}>
+      <div>
          <h2>📋 화재 신고 대시보드</h2>
 
          {/* 신고 URL 생성 및 복사 */}
          <div style={{ marginBottom: "1rem" }}>
-            <button onClick={generateReportUrl}>신고 URL 생성 및 공유</button>
+            <button
+               onClick={generateReportUrl}
+               className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            >
+               신고 URL 생성
+            </button>
+
             {generatedUrl && (
                <div style={{ marginTop: "0.5rem" }}>
+                  <label htmlFor="urlview" className="">
+                     생성된 URL
+                  </label>
                   <input
+                     id="urlview"
                      type="text"
                      readOnly
                      value={generatedUrl}
-                     style={{ width: "400px" }}
+                     class="mt-1 px-4 py-2 w-full bg-slate-100 rounded-full focus:outline-blue-500 text-sm leading-6 text-slate-900 border border-gray-300"
                   />
-                  <button onClick={copyToClipboard}>복사</button>
+                  <button
+                     onClick={copyToClipboard}
+                     className="px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  >
+                     복사
+                  </button>
                </div>
             )}
          </div>
 
-         <table
-            border="1"
-            style={{
-               width: "100%",
-               marginTop: "1rem",
-               borderCollapse: "collapse",
-            }}
-         >
-            <thead>
+         <table className="min-w-full text-left text-sm font-light">
+            <thead className="border-b bg-neutral-50 font-medium dark:border-neutral-500 dark:text-neutral-800">
                <tr>
-                  <th>ID</th>
-                  <th>신고자 위도</th>
-                  <th>신고자 경도</th>
-                  <th>신고자 주소</th>
-                  <th>화재 위도</th>
-                  <th>화재 경도</th>
-                  <th>화재 주소</th>
-                  <th>시간</th>
-                  <th>상태</th>
-                  <th>상세보기</th>
-                  <th>출동지시</th>
+                  <th scope="col" className="px-6 py-4">
+                     ID
+                  </th>
+                  <th scope="col" className="px-6 py-4">
+                     신고자 위도
+                  </th>
+                  <th scope="col" className="px-6 py-4">
+                     신고자 경도
+                  </th>
+                  <th scope="col" className="px-6 py-4">
+                     신고자 주소
+                  </th>
+                  <th scope="col" className="px-6 py-4">
+                     화재 위도
+                  </th>
+                  <th scope="col" className="px-6 py-4">
+                     화재 경도
+                  </th>
+                  <th scope="col" className="px-6 py-4">
+                     화재 주소
+                  </th>
+                  <th scope="col" className="px-6 py-4">
+                     시간
+                  </th>
+                  <th scope="col" className="px-6 py-4">
+                     상태
+                  </th>
+                  <th scope="col" className="px-6 py-4">
+                     상세보기
+                  </th>
+                  <th scope="col" className="px-6 py-4">
+                     출동지시
+                  </th>
                </tr>
             </thead>
             <tbody>
                {reports.map((report) => (
-                  <tr key={report.id}>
-                     <td>{report.id}</td>
-                     <td>{report.reporterLat.toFixed(4)}</td>
-                     <td>{report.reporterLng.toFixed(4)}</td>
-                     <td>{report.reporterAddress || "-"}</td>
-                     <td>{report.fireLat.toFixed(4)}</td>
-                     <td>{report.fireLng.toFixed(4)}</td>
-                     <td>{report.fireAddress || "-"}</td>
-                     <td>{new Date(report.reportedAt).toLocaleString()}</td>
-                     <td>{translateStatus(report.status)}</td>
-                     <td>
-                        <button onClick={() => setSelectedReport(report)}>
+                  <tr
+                     key={report.id}
+                     className="border-b dark:border-neutral-500"
+                  >
+                     <td className="whitespace-nowrap px-6 py-4 font-medium">
+                        {report.id}
+                     </td>
+                     <td className="whitespace-nowrap px-6 py-4">
+                        {report.reporterLat.toFixed(4)}
+                     </td>
+                     <td className="whitespace-nowrap px-6 py-4">
+                        {report.reporterLng.toFixed(4)}
+                     </td>
+                     <td className="whitespace-nowrap px-6 py-4">
+                        {report.reporterAddress || "-"}
+                     </td>
+                     <td className="whitespace-nowrap px-6 py-4">
+                        {report.fireLat.toFixed(4)}
+                     </td>
+                     <td className="whitespace-nowrap px-6 py-4">
+                        {report.fireLng.toFixed(4)}
+                     </td>
+                     <td className="whitespace-nowrap px-6 py-4">
+                        {report.fireAddress || "-"}
+                     </td>
+                     <td className="whitespace-nowrap px-6 py-4">
+                        {new Date(report.reportedAt).toLocaleString()}
+                     </td>
+                     <td className="whitespace-nowrap px-6 py-4">
+                        {translateStatus(report.status)}
+                     </td>
+                     <td className="whitespace-nowrap px-6 py-4">
+                        <button
+                           className="text-blue-600 hover:underline"
+                           onClick={() => setSelectedReport(report)}
+                        >
                            상세보기
                         </button>
                      </td>
-                     <td>
-                        <button onClick={() => handleDispatch(report.id)}>
+                     <td className="whitespace-nowrap px-6 py-4">
+                        <button
+                           className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                           onClick={() => handleDispatch(report.id)}
+                        >
                            출동지시
                         </button>
                      </td>
@@ -134,6 +191,11 @@ function DashboardPage() {
          {selectedReport && (
             <div style={{ marginTop: "2rem" }}>
                <h3>🗺️ 신고 위치 지도 보기 (ID: {selectedReport.id})</h3>
+               {/* 토큰 값 표시 */}
+               <p>
+                  🔑 공유 URL 토큰:
+                  <code>{selectedReport.token || "토큰 정보 없음"}</code>
+               </p>
                <MapPreview
                   reporterLat={selectedReport.reporterLat}
                   reporterLng={selectedReport.reporterLng}

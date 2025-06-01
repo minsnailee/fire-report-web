@@ -9,6 +9,7 @@ function FireMap() {
    const mapRef = useRef(null);
    const [map, setMap] = useState(null);
    const [reporterPos, setReporterPos] = useState(null);
+   const [firePos, setFirePos] = useState(null);
    const [centerPos, setCenterPos] = useState(null);
    const [accuracyInfo, setAccuracyInfo] = useState("");
    const [token, setToken] = useState("");
@@ -59,6 +60,7 @@ function FireMap() {
                () => {
                   const center = kakaoMap.getCenter();
                   setCenterPos(center);
+                  setFirePos(center); // firePos를 지도 중심으로 계속 업데이트
                }
             );
 
@@ -76,6 +78,7 @@ function FireMap() {
       };
    }, [KAKAO_MAP_KEY]);
 
+   // 신고자 위치 가져오기, 마커 표시 및 초기 화재 위치 설정
    useEffect(() => {
       if (!map) return;
 
@@ -87,10 +90,13 @@ function FireMap() {
 
             map.setCenter(pos);
             setReporterPos(pos);
+            setFirePos(pos); // 초기 화재 위치를 신고자 위치와 동일하게 설정
+
             setAccuracyInfo(
                `위치 정확도: 약 ${Math.round(position.coords.accuracy)}m`
             );
 
+            // 신고자 위치 마커
             new window.kakao.maps.Marker({
                map: map,
                position: pos,
@@ -113,6 +119,26 @@ function FireMap() {
       );
    }, [map]);
 
+   // 화재 위치 마커 (CustomOverlay) - 빨간색 pulse 마커
+   useEffect(() => {
+      if (!map || !firePos) return;
+
+      // 기존 오버레이 제거를 위해 ref 사용하면 좋음 (생략 가능)
+      const content = '<div class="marker"></div>';
+      const overlay = new window.kakao.maps.CustomOverlay({
+         position: firePos,
+         content: content,
+         yAnchor: 0.5,
+         zIndex: 10,
+      });
+
+      overlay.setMap(map);
+
+      return () => {
+         overlay.setMap(null);
+      };
+   }, [map, firePos]);
+
    const refreshLocation = () => {
       if (!navigator.geolocation) {
          alert("브라우저가 위치 정보를 지원하지 않습니다.");
@@ -127,15 +153,10 @@ function FireMap() {
             );
             map.setCenter(pos);
             setReporterPos(pos);
+            setFirePos(pos); // 화재 위치도 같이 초기화
             setAccuracyInfo(
                `위치 정확도: 약 ${Math.round(position.coords.accuracy)}m`
             );
-
-            new window.kakao.maps.Marker({
-               map: map,
-               position: pos,
-               title: "신고자 위치",
-            });
          },
          () => {
             alert("위치 정보를 다시 가져올 수 없습니다.");
@@ -143,7 +164,7 @@ function FireMap() {
       );
    };
 
-   // 신고자 위치 역지오코딩 부분
+   // 신고자 위치 역지오코딩
    useEffect(() => {
       if (!reporterPos) return;
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services)
@@ -170,13 +191,13 @@ function FireMap() {
 
    // 화재 위치 주소 역지오코딩
    useEffect(() => {
-      if (!kakaoReady || !centerPos) return;
+      if (!kakaoReady || !firePos) return;
 
       const geocoder = new window.kakao.maps.services.Geocoder();
 
       geocoder.coord2Address(
-         centerPos.getLng(),
-         centerPos.getLat(),
+         firePos.getLng(),
+         firePos.getLat(),
          (result, status) => {
             if (status === window.kakao.maps.services.Status.OK) {
                const address =
@@ -187,10 +208,10 @@ function FireMap() {
             }
          }
       );
-   }, [centerPos, kakaoReady]);
+   }, [firePos, kakaoReady]);
 
    const handleSubmit = async () => {
-      if (!map || !reporterPos || !centerPos) {
+      if (!map || !reporterPos || !firePos) {
          alert("지도와 위치 정보를 모두 확인해주세요.");
          return;
       }
@@ -202,8 +223,8 @@ function FireMap() {
 
       const payload = {
          reportedId: token,
-         fireLat: centerPos.getLat(),
-         fireLng: centerPos.getLng(),
+         fireLat: firePos.getLat(),
+         fireLng: firePos.getLng(),
          fireAddress: fireAddress || "주소 미입력",
          reporterLat: reporterPos.getLat(),
          reporterLng: reporterPos.getLng(),
@@ -228,81 +249,98 @@ function FireMap() {
    };
 
    return (
-      <div style={{ padding: "1rem", position: "relative" }}>
-         <h2>📍 화재 신고 위치 선택</h2>
+      <>
+         <style>{`
+        .marker {
+  height: 15px;
+  width: 15px;
+  background: rgba(255, 0, 0, 1);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 2px rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  animation: marker 2.75s infinite;
+}
 
-         <div
-            id="map"
-            style={{
-               width: "100%",
-               height: "400px",
-               position: "relative",
-               border: "1px solid #ccc",
-            }}
-         ></div>
+@keyframes marker {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(255, 100, 100, 1),
+      0 0 0 0 rgba(255, 0, 0, 1);
+  }
+  70% {
+    box-shadow:
+      0 0 15px 15px rgba(255, 100, 100, 0),
+      0 0 15px 15px rgba(255, 0, 0, 0);
+  }
+  100% {
+    box-shadow:
+      0 0 15px 15px rgba(255, 100, 100, 0),
+      0 0 15px 15px rgba(255, 0, 0, 0);
+  }
+}
 
-         {/* 🔴 고정 마커 */}
-         <div
-            style={{
-               position: "absolute",
-               top: "calc(200px + 40px)",
-               left: "50%",
-               transform: "translate(-50%, -100%)",
-               zIndex: 10,
-               pointerEvents: "none",
-            }}
-         >
-            <img
-               src={`data:image/svg+xml;base64,${btoa(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14">
-              <circle cx="7" cy="7" r="7" fill="orange" />
-            </svg>
-          `)}`}
-               alt="fire-marker"
-            />
-         </div>
+      `}</style>
 
-         <div style={{ marginTop: "1rem" }}>
-            <p>🧍‍♂️ 신고자 위치 (GPS)</p>
-            {reporterPos && (
-               <p style={{ fontSize: "0.9em" }}>
-                  위도: {reporterPos.getLat().toFixed(6)} / 경도:{" "}
-                  {reporterPos.getLng().toFixed(6)}
-               </p>
-            )}
-            {accuracyInfo && (
-               <p style={{ fontSize: "0.9em", color: "gray" }}>
-                  {accuracyInfo}
-               </p>
-            )}
-            <button onClick={refreshLocation}>🔄 위치 새로고침</button>
-         </div>
+         <div>
+            <h2 className="hidden">📍 화재 신고 위치 선택</h2>
 
-         <div style={{ marginTop: "1rem" }}>
-            <p>🔥 화재 발생 위치 (지도 중심)</p>
-            {centerPos && (
-               <p style={{ fontSize: "0.9em" }}>
-                  위도: {centerPos.getLat().toFixed(6)} / 경도:{" "}
-                  {centerPos.getLng().toFixed(6)}
-               </p>
-            )}
-            {fireAddress && (
+            <div
+               id="map"
+               style={{
+                  width: "100vw",
+                  height: "100vh",
+                  position: "relative",
+                  border: "1px solid #ccc",
+               }}
+            ></div>
+
+            <div style={{ marginTop: "1rem" }}>
+               <p>🧍‍♂️ 신고자 위치 (GPS)</p>
+               {reporterPos && (
+                  <p style={{ fontSize: "0.9em" }}>
+                     위도: {reporterPos.getLat().toFixed(6)} / 경도:{" "}
+                     {reporterPos.getLng().toFixed(6)}
+                  </p>
+               )}
+               {accuracyInfo && (
+                  <p style={{ fontSize: "0.9em", color: "gray" }}>
+                     {accuracyInfo}
+                  </p>
+               )}
+               <button
+                  onClick={refreshLocation}
+                  className="inline-flex items-center justify-center border align-middle select-none font-sans font-medium text-center transition-all ease-in disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed focus:shadow-none text-sm py-2 px-4 shadow-sm bg-transparent relative text-stone-700 hover:text-stone-700 border-stone-500 hover:bg-transparent duration-150 hover:border-stone-600 rounded-lg hover:opacity-60 hover:shadow-none"
+               >
+                  위치 새로고침
+               </button>
+            </div>
+
+            <div style={{ marginTop: "1rem" }}>
+               <p>🔥 화재 발생 위치 (지도 중심)</p>
+               {firePos && (
+                  <p style={{ fontSize: "0.9em" }}>
+                     위도: {firePos.getLat().toFixed(6)} / 경도:{" "}
+                     {firePos.getLng().toFixed(6)}
+                  </p>
+               )}
+               {fireAddress && (
+                  <p style={{ fontSize: "0.9em", color: "#666" }}>
+                     주소: {fireAddress}
+                  </p>
+               )}
                <p style={{ fontSize: "0.9em", color: "#666" }}>
-                  주소: {fireAddress}
+                  👉 지도를 움직여 화재 위치를 조정하세요.
                </p>
-            )}
-            <p style={{ fontSize: "0.9em", color: "#666" }}>
-               👉 지도를 움직여 화재 위치를 조정하세요.
-            </p>
-         </div>
+            </div>
 
-         <button
-            onClick={handleSubmit}
-            style={{ marginTop: "1rem", padding: "0.5rem 1rem" }}
-         >
-            🚨 위치 전송
-         </button>
-      </div>
+            <button
+               onClick={handleSubmit}
+               style={{ marginTop: "1rem", padding: "0.5rem 1rem" }}
+            >
+               🚨 위치 전송
+            </button>
+         </div>
+      </>
    );
 }
 

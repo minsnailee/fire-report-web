@@ -23,5 +23,5 @@ public class FireReportDto {
     private FireReportStatus status;
     private LocalDateTime reportedAt;
     private LocalDateTime dispatchedAt;
-    private LocalDateTime resolvedAt;
+    private LocalDateTime resolvedAt;;
 }
