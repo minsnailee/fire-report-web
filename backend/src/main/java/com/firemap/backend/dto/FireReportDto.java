@@ -1,0 +1,23 @@
+package com.firemap.backend.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import java.time.LocalDateTime;
+
+import com.firemap.backend.enums.FireReportStatus;
+
+@Data
+@AllArgsConstructor
+public class FireReportDto {
+    private Long id;
+    private Long reportedId;
+    private double lat;
+    private double lng;
+    private String address;
+    // private String reporterAddress;
+    // private String fireAddress;
+    private FireReportStatus status;
+    private LocalDateTime reportedAt;
+    private LocalDateTime dispatchedAt;
+    private LocalDateTime resolvedAt;
+}
