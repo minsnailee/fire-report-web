@@ -48,13 +48,35 @@ function DashboardPage() {
       }
    };
 
+   // const handleDispatch = async (id) => {
+   //    try {
+   //       await axios.patch(`${apiUrl}/reports/${id}/dispatch`);
+   //       alert("🚓 출동 지시 완료");
+   //       setReports((prev) =>
+   //          prev.map((r) => (r.id === id ? { ...r, status: "dispatched" } : r))
+   //       );
+   //    } catch (error) {
+   //       alert("❌ 출동 지시 실패");
+   //       console.error(error);
+   //    }
+   // };
+
    const handleDispatch = async (id) => {
       try {
-         await axios.patch(`${apiUrl}/reports/${id}/dispatch`);
-         alert("🚓 출동 지시 완료");
-         setReports((prev) =>
-            prev.map((r) => (r.id === id ? { ...r, status: "dispatched" } : r))
+         const response = await axios.patch(
+            `${apiUrl}/fire-reports/${id}/dispatch`
          );
+         const token = response.data;
+         const firefighterUrl = `${window.location.origin}/firefighter?token=${token}`;
+         alert(`🚒 소방관 URL 생성됨:\n${firefighterUrl}`);
+
+         // 상태 업데이트
+         setReports((prev) =>
+            prev.map((r) =>
+               r.id === id ? { ...r, status: "dispatched", token } : r
+            )
+         );
+         // console.log("handleDispatch response data:", response.data);
       } catch (error) {
          alert("❌ 출동 지시 실패");
          console.error(error);
@@ -84,7 +106,7 @@ function DashboardPage() {
                      type="text"
                      readOnly
                      value={generatedUrl}
-                     class="mt-1 px-4 py-2 w-full bg-slate-100 rounded-full focus:outline-blue-500 text-sm leading-6 text-slate-900 border border-gray-300"
+                     className="mt-1 px-4 py-2 w-full bg-slate-100 rounded-full focus:outline-blue-500 text-sm leading-6 text-slate-900 border border-gray-300"
                   />
                   <button
                      onClick={copyToClipboard}
@@ -180,7 +202,9 @@ function DashboardPage() {
                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                            onClick={() => handleDispatch(report.id)}
                         >
-                           출동지시
+                           {report.status?.toLowerCase() === "dispatched"
+                              ? "재전송"
+                              : "출동 지시"}
                         </button>
                      </td>
                   </tr>
@@ -193,8 +217,10 @@ function DashboardPage() {
                <h3>🗺️ 신고 위치 지도 보기 (ID: {selectedReport.id})</h3>
                {/* 토큰 값 표시 */}
                <p>
-                  🔑 공유 URL 토큰:
-                  <code>{selectedReport.token || "토큰 정보 없음"}</code>
+                  🔑 <strong>토큰 ID:</strong>{" "}
+                  {selectedReport.tokenId ?? "없음"} <br />
+                  🔑 <strong>토큰 값:</strong>{" "}
+                  <code>{selectedReport.token ?? "없음"}</code>
                </p>
                <MapPreview
                   reporterLat={selectedReport.reporterLat}
@@ -209,7 +235,9 @@ function DashboardPage() {
 
    // 상태 enum 한글 변환 함수 예시
    function translateStatus(status) {
-      switch (status) {
+      switch (
+         status.toLowerCase() // toLowerCase() 추가
+      ) {
          case "reported":
             return "신고 접수됨";
          case "dispatched":

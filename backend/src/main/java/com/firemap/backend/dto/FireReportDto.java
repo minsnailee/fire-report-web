@@ -10,7 +10,9 @@ import com.firemap.backend.enums.FireReportStatus;
 @AllArgsConstructor
 public class FireReportDto {
     private Long id;
-    private Long reportedId;
+    // private Long reportedId;
+    private Long tokenId;
+    private String token;
     // private double lat;
     // private double lng;
     // private String address;
