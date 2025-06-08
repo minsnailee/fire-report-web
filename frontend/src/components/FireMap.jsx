@@ -102,11 +102,16 @@ function FireMap() {
                position: pos,
                title: "신고자 위치",
                image: new window.kakao.maps.MarkerImage(
+                  "/assets/user-marker.png", // public 기준 경로
+                  new window.kakao.maps.Size(32, 32),
+                  { offset: new window.kakao.maps.Point(16, 32) } // 마커 기준점 (중앙 하단)
+               ),
+               image: new window.kakao.maps.MarkerImage(
                   "data:image/svg+xml;base64," +
                      btoa(`
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12">
-                <circle cx="6" cy="6" r="6" fill="lime" />
-              </svg>
+      <circle cx="6" cy="6" r="5" fill="lime" stroke="green" stroke-width="1" />
+    </svg>
             `),
                   new window.kakao.maps.Size(12, 12),
                   { offset: new window.kakao.maps.Point(6, 6) }
@@ -124,7 +129,7 @@ function FireMap() {
       if (!map || !firePos) return;
 
       // 기존 오버레이 제거를 위해 ref 사용하면 좋음 (생략 가능)
-      const content = '<div class="marker"></div>';
+      const content = '<div class="fire-marker"></div>';
       const overlay = new window.kakao.maps.CustomOverlay({
          position: firePos,
          content: content,
@@ -250,37 +255,6 @@ function FireMap() {
 
    return (
       <>
-         <style>{`
-        .marker {
-  height: 15px;
-  width: 15px;
-  background: rgba(255, 0, 0, 1);
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  box-shadow: inset 0 2px rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  animation: marker 2.75s infinite;
-}
-
-@keyframes marker {
-  0% {
-    box-shadow:
-      0 0 0 0 rgba(255, 100, 100, 1),
-      0 0 0 0 rgba(255, 0, 0, 1);
-  }
-  70% {
-    box-shadow:
-      0 0 15px 15px rgba(255, 100, 100, 0),
-      0 0 15px 15px rgba(255, 0, 0, 0);
-  }
-  100% {
-    box-shadow:
-      0 0 15px 15px rgba(255, 100, 100, 0),
-      0 0 15px 15px rgba(255, 0, 0, 0);
-  }
-}
-
-      `}</style>
-
          <div>
             <h2 className="hidden">📍 화재 신고 위치 선택</h2>
 

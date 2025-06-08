@@ -1,3 +1,4 @@
+// DashboardPage.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -39,6 +40,7 @@ function DashboardPage() {
          const token = response.data;
          const url = `${window.location.origin}/report?token=${token}`;
          setGeneratedUrl(url);
+         console.log(url);
       } catch (error) {
          alert("❌ 신고 URL 생성 실패");
          console.error(error);
@@ -53,22 +55,32 @@ function DashboardPage() {
       }
    };
 
-   const handleDispatch = async (id) => {
+   const handleDispatch = async (reportToken, fireStationId) => {
       try {
-         const response = await axios.patch(
-            `${apiUrl}/fire-reports/${id}/dispatch`
-         );
-         const token = response.data;
-         const firefighterUrl = `${window.location.origin}/firefighter?token=${token}`;
-         alert(`🚒 소방관 URL 생성됨:\n${firefighterUrl}`);
+         const response = await axios.post(`${apiUrl}/fire-dispatches`, {
+            reportToken,
+            fireStationId,
+            status: "dispatched",
+         });
+
+         const createdDispatch = response.data;
+         const url = `${window.location.origin}/firefighter?token=${reportToken}&fireStationId=${fireStationId}`;
+
+         alert(`🚒 소방관 URL 생성됨:\n${url}`);
+         console.log("🚀 출동 URL:", url);
+
          setReports((prev) =>
             prev.map((r) =>
-               r.id === id ? { ...r, status: "dispatched", token } : r
+               r.id === selectedReport?.id ? { ...r, status: "dispatched" } : r
             )
+         );
+
+         setSelectedReport((prev) =>
+            prev ? { ...prev, status: "dispatched" } : prev
          );
       } catch (error) {
          alert("❌ 출동 지시 실패");
-         console.error(error);
+         console.error("🚨 출동 지시 에러:", error);
       }
    };
 
@@ -96,7 +108,7 @@ function DashboardPage() {
    }
 
    function getSortedStationsByDistance(fireLat, fireLng) {
-      const R = 6371; // 지구 반지름 (km)
+      const R = 6371;
       return fireStations
          .map((station) => {
             const dLat = (station.latitude - fireLat) * (Math.PI / 180);
@@ -147,90 +159,46 @@ function DashboardPage() {
          <table className="min-w-full text-left text-sm font-light">
             <thead className="border-b bg-neutral-50 font-medium dark:border-neutral-500 dark:text-neutral-800">
                <tr>
-                  <th scope="col" className="px-6 py-4">
-                     ID
-                  </th>
-                  <th scope="col" className="px-6 py-4">
-                     신고자 위도
-                  </th>
-                  <th scope="col" className="px-6 py-4">
-                     신고자 경도
-                  </th>
-                  <th scope="col" className="px-6 py-4">
-                     신고자 주소
-                  </th>
-                  <th scope="col" className="px-6 py-4">
-                     화재 위도
-                  </th>
-                  <th scope="col" className="px-6 py-4">
-                     화재 경도
-                  </th>
-                  <th scope="col" className="px-6 py-4">
-                     화재 주소
-                  </th>
-                  <th scope="col" className="px-6 py-4">
-                     시간
-                  </th>
-                  <th scope="col" className="px-6 py-4">
-                     상태
-                  </th>
-                  <th scope="col" className="px-6 py-4">
-                     상세보기
-                  </th>
-                  <th scope="col" className="px-6 py-4">
-                     출동지시
-                  </th>
+                  <th className="px-6 py-4">ID</th>
+                  <th className="px-6 py-4">신고자 위도</th>
+                  <th className="px-6 py-4">신고자 경도</th>
+                  <th className="px-6 py-4">신고자 주소</th>
+                  <th className="px-6 py-4">화재 위도</th>
+                  <th className="px-6 py-4">화재 경도</th>
+                  <th className="px-6 py-4">화재 주소</th>
+                  <th className="px-6 py-4">시간</th>
+                  <th className="px-6 py-4">상태</th>
+                  <th className="px-6 py-4">상세보기</th>
                </tr>
             </thead>
             <tbody>
                {reports.map((report) => (
-                  <tr
-                     key={report.id}
-                     className="border-b dark:border-neutral-500"
-                  >
-                     <td className="whitespace-nowrap px-6 py-4 font-medium">
-                        {report.id}
-                     </td>
-                     <td className="whitespace-nowrap px-6 py-4">
+                  <tr key={report.id} className="border-b">
+                     <td className="px-6 py-4">{report.id}</td>
+                     <td className="px-6 py-4">
                         {report.reporterLat.toFixed(4)}
                      </td>
-                     <td className="whitespace-nowrap px-6 py-4">
+                     <td className="px-6 py-4">
                         {report.reporterLng.toFixed(4)}
                      </td>
-                     <td className="whitespace-nowrap px-6 py-4">
+                     <td className="px-6 py-4">
                         {report.reporterAddress || "-"}
                      </td>
-                     <td className="whitespace-nowrap px-6 py-4">
-                        {report.fireLat.toFixed(4)}
-                     </td>
-                     <td className="whitespace-nowrap px-6 py-4">
-                        {report.fireLng.toFixed(4)}
-                     </td>
-                     <td className="whitespace-nowrap px-6 py-4">
-                        {report.fireAddress || "-"}
-                     </td>
-                     <td className="whitespace-nowrap px-6 py-4">
+                     <td className="px-6 py-4">{report.fireLat.toFixed(4)}</td>
+                     <td className="px-6 py-4">{report.fireLng.toFixed(4)}</td>
+                     <td className="px-6 py-4">{report.fireAddress || "-"}</td>
+                     <td className="px-6 py-4">
                         {new Date(report.reportedAt).toLocaleString()}
                      </td>
-                     <td className="whitespace-nowrap px-6 py-4">
+                     <td className="px-6 py-4">
                         {translateStatus(report.status)}
                      </td>
-                     <td className="whitespace-nowrap px-6 py-4">
+                     <td className="px-6 py-4">
                         <button
                            className="text-blue-600 hover:underline"
                            onClick={() => setSelectedReport(report)}
                         >
                            상세보기
-                        </button>
-                     </td>
-                     <td className="whitespace-nowrap px-6 py-4">
-                        <button
-                           className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                           onClick={() => handleDispatch(report.id)}
-                        >
-                           {report.status?.toLowerCase() === "dispatched"
-                              ? "재전송"
-                              : "출동 지시"}
                         </button>
                      </td>
                   </tr>
@@ -244,8 +212,8 @@ function DashboardPage() {
                   🗺️ 신고 위치 지도 보기 (ID: {selectedReport.id})
                </h3>
                <p>
-                  🔑 <strong>토큰 :</strong>
-                  <code>{selectedReport.token ?? "없음"}</code>
+                  🔑 <strong>토큰 :</strong>{" "}
+                  <code>{selectedReport?.token ?? "없음"}</code>
                </p>
                <MapPreview
                   reporterLat={selectedReport.reporterLat}
@@ -254,17 +222,20 @@ function DashboardPage() {
                   fireLng={selectedReport.fireLng}
                />
 
-               {/* 가까운 소방서 목록 */}
                <h4 className="text-lg font-semibold mt-4 mb-2">
                   🚒 가까운 소방서 목록
                </h4>
                <table className="min-w-full text-left text-sm border">
-                  <thead className="bg-gray-100">
+                  <thead>
                      <tr>
                         <th className="px-4 py-2">센터명</th>
                         <th className="px-4 py-2">주소</th>
                         <th className="px-4 py-2">전화번호</th>
                         <th className="px-4 py-2">거리 (km)</th>
+                        <th className="px-4 py-2">가용 인원</th>
+                        <th className="px-4 py-2">출동 중</th>
+                        <th className="px-4 py-2">사다리차</th>
+                        <th className="px-4 py-2">출동 지시</th>
                      </tr>
                   </thead>
                   <tbody>
@@ -274,7 +245,10 @@ function DashboardPage() {
                      )
                         .slice(0, 5)
                         .map((station) => (
-                           <tr key={station.id} className="border-t">
+                           <tr
+                              key={station.id || station.centerName}
+                              className="border-t"
+                           >
                               <td className="px-4 py-2">
                                  {station.centerName}
                               </td>
@@ -282,6 +256,29 @@ function DashboardPage() {
                               <td className="px-4 py-2">{station.phone}</td>
                               <td className="px-4 py-2">
                                  {station.distance.toFixed(2)}
+                              </td>
+                              <td className="px-4 py-2">
+                                 {station.availablePersonnel}
+                              </td>
+                              <td className="px-4 py-2">
+                                 {station.isDispatching ? "출동 중" : "대기 중"}
+                              </td>
+                              <td className="px-4 py-2">
+                                 {station.hasLadderTruck ? "보유" : "없음"}
+                              </td>
+                              <td className="px-4 py-2">
+                                 <button
+                                    className="px-3 py-1 text-sm rounded bg-green-500 text-white hover:bg-green-600"
+                                    onClick={() =>
+                                       selectedReport?.token &&
+                                       handleDispatch(
+                                          selectedReport.token,
+                                          station.id
+                                       )
+                                    }
+                                 >
+                                    출동 지시
+                                 </button>
                               </td>
                            </tr>
                         ))}
@@ -302,43 +299,69 @@ function MapPreview({ reporterLat, reporterLng, fireLat, fireLng }) {
       script.async = true;
       script.onload = () => {
          window.kakao.maps.load(() => {
-            const container = document.getElementById("map-preview");
+            const container = document.getElementById("map");
             const options = {
-               center: new window.kakao.maps.LatLng(fireLat, fireLng),
-               level: 3,
+               center: new window.kakao.maps.LatLng(
+                  (reporterLat + fireLat) / 2,
+                  (reporterLng + fireLng) / 2
+               ),
+               level: 7,
             };
             const map = new window.kakao.maps.Map(container, options);
 
-            new window.kakao.maps.Marker({
-               map,
-               position: new window.kakao.maps.LatLng(fireLat, fireLng),
-               title: "🔥 화재 위치",
-            });
+            const reporterPos = new window.kakao.maps.LatLng(
+               reporterLat,
+               reporterLng
+            );
+            const firePos = new window.kakao.maps.LatLng(fireLat, fireLng);
 
+            // 신고자 마커
             new window.kakao.maps.Marker({
                map,
-               position: new window.kakao.maps.LatLng(reporterLat, reporterLng),
-               title: "🧍‍♂️ 신고자 위치",
+               position: reporterPos,
+               title: "신고자 위치",
                image: new window.kakao.maps.MarkerImage(
                   "data:image/svg+xml;base64," +
                      btoa(`
-                  <svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'>
-                     <circle cx='6' cy='6' r='6' fill='lime'/>
-                  </svg>`),
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12">
+      <circle cx="6" cy="6" r="5" fill="lime" stroke="green" stroke-width="1" />
+    </svg>
+            `),
                   new window.kakao.maps.Size(12, 12),
                   { offset: new window.kakao.maps.Point(6, 6) }
                ),
             });
+
+            // 화재 위치 마커
+            const fireOverlay = new window.kakao.maps.CustomOverlay({
+               position: firePos,
+               content: '<div class="fire-marker"></div>',
+               yAnchor: 0.5,
+               zIndex: 10,
+            });
+            fireOverlay.setMap(map);
+
+            // 두 위치를 모두 보이도록 지도 범위 조정
+            const bounds = new window.kakao.maps.LatLngBounds();
+            bounds.extend(reporterPos);
+            bounds.extend(firePos);
+            map.setBounds(bounds);
          });
       };
       document.head.appendChild(script);
+
+      return () => {
+         // 클린업: 스크립트 제거 가능
+         document.head.removeChild(script);
+      };
    }, [reporterLat, reporterLng, fireLat, fireLng]);
 
    return (
       <div
-         id="map-preview"
-         style={{ width: "100%", height: "300px", border: "1px solid #ccc" }}
-      ></div>
+         id="map"
+         style={{ width: "100%", height: "300px", borderRadius: "10px" }}
+         className="mb-4"
+      />
    );
 }
 
