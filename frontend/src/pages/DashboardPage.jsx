@@ -20,9 +20,8 @@ function DashboardPage() {
 
       const fetchFireStations = async () => {
          try {
-            const response = await fetch("/firestations.json");
-            const data = await response.json();
-            setFireStations(data);
+            const response = await axios.get(`${apiUrl}/fire-stations`);
+            setFireStations(response.data);
          } catch (error) {
             console.error("❌ 소방서 정보 불러오기 실패", error);
          }
@@ -97,15 +96,15 @@ function DashboardPage() {
    }
 
    function getSortedStationsByDistance(fireLat, fireLng) {
-      const R = 6371; // Earth radius in km
+      const R = 6371; // 지구 반지름 (km)
       return fireStations
          .map((station) => {
-            const dLat = (station.위도 - fireLat) * (Math.PI / 180);
-            const dLng = (station.경도 - fireLng) * (Math.PI / 180);
+            const dLat = (station.latitude - fireLat) * (Math.PI / 180);
+            const dLng = (station.longitude - fireLng) * (Math.PI / 180);
             const a =
                Math.sin(dLat / 2) ** 2 +
                Math.cos(fireLat * (Math.PI / 180)) *
-                  Math.cos(station.위도 * (Math.PI / 180)) *
+                  Math.cos(station.latitude * (Math.PI / 180)) *
                   Math.sin(dLng / 2) ** 2;
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             const distance = R * c;
@@ -275,14 +274,12 @@ function DashboardPage() {
                      )
                         .slice(0, 5)
                         .map((station) => (
-                           <tr key={station.주소} className="border-t">
+                           <tr key={station.id} className="border-t">
                               <td className="px-4 py-2">
-                                 {station["119안전센터명"]}
+                                 {station.centerName}
                               </td>
-                              <td className="px-4 py-2">{station["주소"]}</td>
-                              <td className="px-4 py-2">
-                                 {station["전화번호"]}
-                              </td>
+                              <td className="px-4 py-2">{station.address}</td>
+                              <td className="px-4 py-2">{station.phone}</td>
                               <td className="px-4 py-2">
                                  {station.distance.toFixed(2)}
                               </td>
