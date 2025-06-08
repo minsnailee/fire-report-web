@@ -1,7 +1,7 @@
-package com.firemap.backend.repository;
+// package com.firemap.backend.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import com.firemap.backend.entity.DispatchLogEntity;
+// import org.springframework.data.jpa.repository.JpaRepository;
+// import com.firemap.backend.entity.DispatchLogEntity;
 
-public interface DispatchLogRepository extends JpaRepository<DispatchLogEntity, Long> {
-}
+// public interface DispatchLogRepository extends JpaRepository<DispatchLogEntity, Long> {
+// }
