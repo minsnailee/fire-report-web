@@ -5,11 +5,10 @@ function DashboardPage() {
    const [reports, setReports] = useState([]);
    const [selectedReport, setSelectedReport] = useState(null);
    const [generatedUrl, setGeneratedUrl] = useState("");
-
+   const [fireStations, setFireStations] = useState([]);
    const apiUrl = import.meta.env.VITE_API_URL;
 
    useEffect(() => {
-      // 신고 목록 불러오기
       const fetchReports = async () => {
          try {
             const response = await axios.get(`${apiUrl}/fire-reports`);
@@ -19,19 +18,26 @@ function DashboardPage() {
          }
       };
 
+      const fetchFireStations = async () => {
+         try {
+            const response = await fetch("/firestations.json");
+            const data = await response.json();
+            setFireStations(data);
+         } catch (error) {
+            console.error("❌ 소방서 정보 불러오기 실패", error);
+         }
+      };
+
       fetchReports();
+      fetchFireStations();
    }, [apiUrl]);
 
-   // 신고 URL 생성 함수
    const generateReportUrl = async () => {
       try {
-         // 서버에서 토큰 생성 및 저장
          const response = await axios.post(
             `${apiUrl}/fire-report-tokens/create`
          );
-         const token = response.data; // 서버가 { token: "..." } 형태로 반환한다고 가정
-
-         // 현재 사이트 주소 기준 신고 URL 생성
+         const token = response.data;
          const url = `${window.location.origin}/report?token=${token}`;
          setGeneratedUrl(url);
       } catch (error) {
@@ -48,19 +54,6 @@ function DashboardPage() {
       }
    };
 
-   // const handleDispatch = async (id) => {
-   //    try {
-   //       await axios.patch(`${apiUrl}/reports/${id}/dispatch`);
-   //       alert("🚓 출동 지시 완료");
-   //       setReports((prev) =>
-   //          prev.map((r) => (r.id === id ? { ...r, status: "dispatched" } : r))
-   //       );
-   //    } catch (error) {
-   //       alert("❌ 출동 지시 실패");
-   //       console.error(error);
-   //    }
-   // };
-
    const handleDispatch = async (id) => {
       try {
          const response = await axios.patch(
@@ -69,48 +62,82 @@ function DashboardPage() {
          const token = response.data;
          const firefighterUrl = `${window.location.origin}/firefighter?token=${token}`;
          alert(`🚒 소방관 URL 생성됨:\n${firefighterUrl}`);
-
-         // 상태 업데이트
          setReports((prev) =>
             prev.map((r) =>
                r.id === id ? { ...r, status: "dispatched", token } : r
             )
          );
-         // console.log("handleDispatch response data:", response.data);
       } catch (error) {
          alert("❌ 출동 지시 실패");
          console.error(error);
       }
    };
 
-   return (
-      <div>
-         <h2>📋 화재 신고 대시보드</h2>
+   function translateStatus(status) {
+      switch (status?.toLowerCase()) {
+         case "reported":
+            return "신고 접수됨";
+         case "dispatched":
+            return "출동 지시됨";
+         case "en_route":
+            return "진입 중";
+         case "suppressing":
+            return "진압 중";
+         case "additional_support":
+            return "추가 지원 요청됨";
+         case "suppression_completed":
+            return "진압 완료";
+         case "site_recovery":
+            return "현장 복구 중";
+         case "resolved":
+            return "종료";
+         default:
+            return "신고 접수됨";
+      }
+   }
 
-         {/* 신고 URL 생성 및 복사 */}
-         <div style={{ marginBottom: "1rem" }}>
+   function getSortedStationsByDistance(fireLat, fireLng) {
+      const R = 6371; // Earth radius in km
+      return fireStations
+         .map((station) => {
+            const dLat = (station.위도 - fireLat) * (Math.PI / 180);
+            const dLng = (station.경도 - fireLng) * (Math.PI / 180);
+            const a =
+               Math.sin(dLat / 2) ** 2 +
+               Math.cos(fireLat * (Math.PI / 180)) *
+                  Math.cos(station.위도 * (Math.PI / 180)) *
+                  Math.sin(dLng / 2) ** 2;
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = R * c;
+            return { ...station, distance };
+         })
+         .sort((a, b) => a.distance - b.distance);
+   }
+
+   return (
+      <div className="p-4">
+         <h2 className="text-2xl font-bold mb-4">📋 화재 신고 대시보드</h2>
+
+         <div className="mb-4">
             <button
                onClick={generateReportUrl}
-               className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+               className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5"
             >
                신고 URL 생성
             </button>
 
             {generatedUrl && (
-               <div style={{ marginTop: "0.5rem" }}>
-                  <label htmlFor="urlview" className="">
-                     생성된 URL
-                  </label>
+               <div className="mt-2">
+                  <label className="block mb-1">생성된 URL</label>
                   <input
-                     id="urlview"
                      type="text"
                      readOnly
                      value={generatedUrl}
-                     className="mt-1 px-4 py-2 w-full bg-slate-100 rounded-full focus:outline-blue-500 text-sm leading-6 text-slate-900 border border-gray-300"
+                     className="w-full px-4 py-2 bg-gray-100 rounded-full text-sm border"
                   />
                   <button
                      onClick={copyToClipboard}
-                     className="px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                     className="mt-1 px-3 py-2 text-xs text-white bg-blue-700 rounded-lg hover:bg-blue-800"
                   >
                      복사
                   </button>
@@ -213,13 +240,12 @@ function DashboardPage() {
          </table>
 
          {selectedReport && (
-            <div style={{ marginTop: "2rem" }}>
-               <h3>🗺️ 신고 위치 지도 보기 (ID: {selectedReport.id})</h3>
-               {/* 토큰 값 표시 */}
+            <div className="mt-8">
+               <h3 className="text-xl font-semibold mb-2">
+                  🗺️ 신고 위치 지도 보기 (ID: {selectedReport.id})
+               </h3>
                <p>
-                  🔑 <strong>토큰 ID:</strong>{" "}
-                  {selectedReport.tokenId ?? "없음"} <br />
-                  🔑 <strong>토큰 값:</strong>{" "}
+                  🔑 <strong>토큰 :</strong>
                   <code>{selectedReport.token ?? "없음"}</code>
                </p>
                <MapPreview
@@ -228,36 +254,46 @@ function DashboardPage() {
                   fireLat={selectedReport.fireLat}
                   fireLng={selectedReport.fireLng}
                />
+
+               {/* 가까운 소방서 목록 */}
+               <h4 className="text-lg font-semibold mt-4 mb-2">
+                  🚒 가까운 소방서 목록
+               </h4>
+               <table className="min-w-full text-left text-sm border">
+                  <thead className="bg-gray-100">
+                     <tr>
+                        <th className="px-4 py-2">센터명</th>
+                        <th className="px-4 py-2">주소</th>
+                        <th className="px-4 py-2">전화번호</th>
+                        <th className="px-4 py-2">거리 (km)</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     {getSortedStationsByDistance(
+                        selectedReport.fireLat,
+                        selectedReport.fireLng
+                     )
+                        .slice(0, 5)
+                        .map((station) => (
+                           <tr key={station.주소} className="border-t">
+                              <td className="px-4 py-2">
+                                 {station["119안전센터명"]}
+                              </td>
+                              <td className="px-4 py-2">{station["주소"]}</td>
+                              <td className="px-4 py-2">
+                                 {station["전화번호"]}
+                              </td>
+                              <td className="px-4 py-2">
+                                 {station.distance.toFixed(2)}
+                              </td>
+                           </tr>
+                        ))}
+                  </tbody>
+               </table>
             </div>
          )}
       </div>
    );
-
-   // 상태 enum 한글 변환 함수 예시
-   function translateStatus(status) {
-      switch (
-         status.toLowerCase() // toLowerCase() 추가
-      ) {
-         case "reported":
-            return "신고 접수됨";
-         case "dispatched":
-            return "출동 지시됨";
-         case "en_route":
-            return "진입 중";
-         case "suppressing":
-            return "진압 중";
-         case "additional_support":
-            return "추가 지원 요청됨";
-         case "suppression_completed":
-            return "진압 완료";
-         case "site_recovery":
-            return "현장 복구 중";
-         case "resolved":
-            return "종료";
-         default:
-            return "신고 접수됨";
-      }
-   }
 }
 
 function MapPreview({ reporterLat, reporterLng, fireLat, fireLng }) {
@@ -276,14 +312,12 @@ function MapPreview({ reporterLat, reporterLng, fireLat, fireLng }) {
             };
             const map = new window.kakao.maps.Map(container, options);
 
-            // 화재 마커 (중앙)
             new window.kakao.maps.Marker({
                map,
                position: new window.kakao.maps.LatLng(fireLat, fireLng),
                title: "🔥 화재 위치",
             });
 
-            // 신고자 마커
             new window.kakao.maps.Marker({
                map,
                position: new window.kakao.maps.LatLng(reporterLat, reporterLng),
@@ -291,9 +325,9 @@ function MapPreview({ reporterLat, reporterLng, fireLat, fireLng }) {
                image: new window.kakao.maps.MarkerImage(
                   "data:image/svg+xml;base64," +
                      btoa(`
-            <svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'>
-              <circle cx='6' cy='6' r='6' fill='lime'/>
-            </svg>`),
+                  <svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'>
+                     <circle cx='6' cy='6' r='6' fill='lime'/>
+                  </svg>`),
                   new window.kakao.maps.Size(12, 12),
                   { offset: new window.kakao.maps.Point(6, 6) }
                ),
