@@ -18,8 +18,11 @@ function FirefighterPage() {
    const [searchParams] = useSearchParams();
    const token = searchParams.get("token");
    const fireStationId = searchParams.get("fireStationId");
+   // 상태 업데이트
+   const dispatchId = searchParams.get("dispatchId"); // URL에서 추출
    const [statusSelectVisible, setStatusSelectVisible] = useState(false);
    const [selectedStatus, setSelectedStatus] = useState("");
+
    // 렌더링 조건 및 에러 메시지 처리 (최상단에 위치)
    if (!token) return <p>❗ token 파라미터가 없습니다.</p>;
    if (!fireStationId) return <p>❗ fireStationId 파라미터가 없습니다.</p>;
@@ -28,7 +31,7 @@ function FirefighterPage() {
    const kakaoMapKey = import.meta.env.VITE_KAKAO_MAP_KEY;
    const kakaoRestKey = import.meta.env.VITE_KAKAO_MAP_REST_KEY;
 
-   const [report, setReport] = useState(undefined);
+   const [report, setReport] = useState({ status: "DISPATCHED" });
    const [hydrants, setHydrants] = useState([]);
    const [fireStation, setFireStation] = useState(undefined);
    const [map, setMap] = useState(null);
@@ -39,22 +42,33 @@ function FirefighterPage() {
    };
 
    const handleSubmitStatus = () => {
-      if (!selectedStatus || !report?.id) return;
+      if (!selectedStatus || !dispatchId) {
+         console.warn("필수 값 누락", { selectedStatus, dispatchId });
+         alert("상태와 Dispatch ID를 모두 선택하세요.");
+         return;
+      }
+
+      console.log("상태 업데이트 요청 전송", { selectedStatus, dispatchId });
 
       axios
-         .patch(`${apiUrl}/fire-reports/${report.id}/status`, {
-            status: selectedStatus,
+         .put(`${apiUrl}/fire-dispatches/${dispatchId}/status`, null, {
+            params: { status: selectedStatus },
          })
          .then((res) => {
-            alert("상태가 업데이트되었습니다.");
+            console.log("업데이트 성공 응답", res.data);
             setReport(res.data);
-            setStatusSelectVisible(false);
+            alert("상태가 성공적으로 업데이트되었습니다.");
          })
          .catch((err) => {
-            console.error("❌ 상태 업데이트 실패", err);
-            alert("상태 업데이트에 실패했습니다.");
+            console.error("상태 업데이트 실패", err);
+            alert("상태 업데이트 실패!");
          });
    };
+
+   useEffect(() => {
+      const id = searchParams.get("dispatchId");
+      console.log("URL에서 추출한 dispatchId:", id);
+   }, []);
 
    const getDistance = (lat1, lng1, lat2, lng2) => {
       const toRad = (deg) => (deg * Math.PI) / 180;
@@ -75,7 +89,10 @@ function FirefighterPage() {
       setReport(undefined); // 로딩 상태로 설정
       axios
          .get(`${apiUrl}/fire-reports/by-token/${token}`)
-         .then((res) => setReport(res.data))
+         .then((res) => {
+            console.log("🔥 신고 데이터:", res.data); // 여기 찍기
+            setReport(res.data);
+         })
          .catch((err) => {
             console.error("❌ 신고 데이터 불러오기 실패", err);
             setReport(null); // 에러 상태 표시

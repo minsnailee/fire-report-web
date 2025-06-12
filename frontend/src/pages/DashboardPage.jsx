@@ -68,11 +68,13 @@ function DashboardPage() {
          const response = await axios.post(`${apiUrl}/fire-dispatches`, {
             reportToken,
             fireStationId,
-            status: "DISPATCHED", // 💥 대문자 enum 사용
+            status: "DISPATCHED",
          });
 
          const createdDispatch = response.data;
-         const url = `${window.location.origin}/firefighter?token=${reportToken}&fireStationId=${fireStationId}`;
+
+         // 여기서 dispatchId를 포함해서 URL 생성
+         const url = `${window.location.origin}/firefighter?token=${reportToken}&fireStationId=${fireStationId}&dispatchId=${createdDispatch.id}`;
 
          alert(`🚒 소방관 URL 생성됨:\n${url}`);
          console.log("🚀 출동 URL:", url);
