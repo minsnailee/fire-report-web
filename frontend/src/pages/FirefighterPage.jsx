@@ -2,11 +2,24 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 
+// FireReportStatus 값은 enum으로 백엔드와 일치하게
+const STATUS_OPTIONS = [
+   { value: "RECEIVED", label: "접수" },
+   { value: "DISPATCHED", label: "출동" },
+   { value: "ARRIVED", label: "도착" },
+   { value: "INITIAL_SUPPRESSION", label: "초진" },
+   { value: "OVERHAUL", label: "잔불정리" },
+   { value: "FULLY_SUPPRESSED", label: "완진" },
+   { value: "WITHDRAWN", label: "철수" },
+   { value: "MONITORING", label: "잔불감시" },
+];
+
 function FirefighterPage() {
    const [searchParams] = useSearchParams();
    const token = searchParams.get("token");
    const fireStationId = searchParams.get("fireStationId");
-
+   const [statusSelectVisible, setStatusSelectVisible] = useState(false);
+   const [selectedStatus, setSelectedStatus] = useState("");
    // 렌더링 조건 및 에러 메시지 처리 (최상단에 위치)
    if (!token) return <p>❗ token 파라미터가 없습니다.</p>;
    if (!fireStationId) return <p>❗ fireStationId 파라미터가 없습니다.</p>;
@@ -20,6 +33,28 @@ function FirefighterPage() {
    const [fireStation, setFireStation] = useState(undefined);
    const [map, setMap] = useState(null);
    const [polyline, setPolyline] = useState(null);
+
+   const handleStatusChange = (e) => {
+      setSelectedStatus(e.target.value);
+   };
+
+   const handleSubmitStatus = () => {
+      if (!selectedStatus || !report?.id) return;
+
+      axios
+         .patch(`${apiUrl}/fire-reports/${report.id}/status`, {
+            status: selectedStatus,
+         })
+         .then((res) => {
+            alert("상태가 업데이트되었습니다.");
+            setReport(res.data);
+            setStatusSelectVisible(false);
+         })
+         .catch((err) => {
+            console.error("❌ 상태 업데이트 실패", err);
+            alert("상태 업데이트에 실패했습니다.");
+         });
+   };
 
    const getDistance = (lat1, lng1, lat2, lng2) => {
       const toRad = (deg) => (deg * Math.PI) / 180;
@@ -322,15 +357,38 @@ function FirefighterPage() {
             id="firefighter-map"
             style={{ width: "100%", height: "400px", border: "1px solid #ccc" }}
          ></div>
-
+         <p>
+            🔥 화재 상태: <strong>{report.status}</strong>
+         </p>
          <button
-            onClick={() => {
-               alert("기능 구현 준비");
-            }}
-            className="bg-blue-500 text-white px-3 py-1 rounded"
+            className="bg-blue-500 text-white px-3 py-1 rounded mt-3"
+            onClick={() => setStatusSelectVisible(!statusSelectVisible)}
          >
             상황 보고
          </button>
+
+         {statusSelectVisible && (
+            <div className="mt-2">
+               <select
+                  value={selectedStatus}
+                  onChange={handleStatusChange}
+                  className="border px-2 py-1 rounded"
+               >
+                  <option value="">-- 상태 선택 --</option>
+                  {STATUS_OPTIONS.map((opt) => (
+                     <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                     </option>
+                  ))}
+               </select>
+               <button
+                  className="ml-2 bg-green-500 text-white px-3 py-1 rounded"
+                  onClick={handleSubmitStatus}
+               >
+                  제출
+               </button>
+            </div>
+         )}
       </div>
    );
 }

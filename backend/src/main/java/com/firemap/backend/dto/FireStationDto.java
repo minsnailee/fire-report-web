@@ -6,6 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FireStationDto {
+    private Long id;
     private String centerName;
     private String address;
     private String phoneNumber;

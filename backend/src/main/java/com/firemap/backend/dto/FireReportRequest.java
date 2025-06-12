@@ -9,9 +9,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @Data
 public class FireReportRequest {
     private String reportedId; // 토큰 문자열
-    // private double lat;
-    // private double lng;
-    // private String address;
     private double reporterLat;
     private double reporterLng;
     private double fireLat;

@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface FireDispatchRepository extends JpaRepository<FireDispatchEntity, Long> {
-    List<FireDispatchEntity> findByReportToken(String reportToken);
+    List<FireDispatchEntity> findByFireReport_ReportToken_Token(String reportToken);
 }

@@ -102,11 +102,6 @@ function FireMap() {
                position: pos,
                title: "신고자 위치",
                image: new window.kakao.maps.MarkerImage(
-                  "/assets/user-marker.png", // public 기준 경로
-                  new window.kakao.maps.Size(32, 32),
-                  { offset: new window.kakao.maps.Point(16, 32) } // 마커 기준점 (중앙 하단)
-               ),
-               image: new window.kakao.maps.MarkerImage(
                   "data:image/svg+xml;base64," +
                      btoa(`
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12">
