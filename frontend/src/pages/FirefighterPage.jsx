@@ -7,13 +7,17 @@ function FirefighterPage() {
    const token = searchParams.get("token");
    const fireStationId = searchParams.get("fireStationId");
 
+   // 렌더링 조건 및 에러 메시지 처리 (최상단에 위치)
+   if (!token) return <p>❗ token 파라미터가 없습니다.</p>;
+   if (!fireStationId) return <p>❗ fireStationId 파라미터가 없습니다.</p>;
+
    const apiUrl = import.meta.env.VITE_API_URL;
    const kakaoMapKey = import.meta.env.VITE_KAKAO_MAP_KEY;
    const kakaoRestKey = import.meta.env.VITE_KAKAO_MAP_REST_KEY;
 
-   const [report, setReport] = useState(null);
+   const [report, setReport] = useState(undefined);
    const [hydrants, setHydrants] = useState([]);
-   const [fireStation, setFireStation] = useState(null);
+   const [fireStation, setFireStation] = useState(undefined);
    const [map, setMap] = useState(null);
    const [polyline, setPolyline] = useState(null);
 
@@ -33,25 +37,40 @@ function FirefighterPage() {
 
    useEffect(() => {
       if (!token) return;
+      setReport(undefined); // 로딩 상태로 설정
       axios
          .get(`${apiUrl}/fire-reports/by-token/${token}`)
          .then((res) => setReport(res.data))
-         .catch((err) => console.error("❌ 신고 데이터 불러오기 실패", err));
+         .catch((err) => {
+            console.error("❌ 신고 데이터 불러오기 실패", err);
+            setReport(null); // 에러 상태 표시
+         });
    }, [token]);
 
    useEffect(() => {
       if (!fireStationId) return;
+      setFireStation(undefined);
       axios
          .get(`${apiUrl}/fire-stations/${fireStationId}`)
-         .then((res) => setFireStation(res.data))
-         .catch((err) => console.error("❌ 소방서 정보 불러오기 실패", err));
+         .then((res) => {
+            console.log("소방서 데이터 응답:", res.data);
+            setFireStation(res.data);
+         })
+         .catch((err) => {
+            console.error("❌ 소방서 정보 불러오기 실패", err);
+            setFireStation(null);
+         });
    }, [fireStationId]);
 
    useEffect(() => {
+      setHydrants([]);
       axios
          .get(`${apiUrl}/hydrants`)
          .then((res) => setHydrants(res.data))
-         .catch((err) => console.error("❌ 소화전 데이터 불러오기 실패", err));
+         .catch((err) => {
+            console.error("❌ 소화전 데이터 불러오기 실패", err);
+            setHydrants([]);
+         });
    }, []);
 
    useEffect(() => {
@@ -96,12 +115,12 @@ function FirefighterPage() {
                   image: new kakao.maps.MarkerImage(
                      "data:image/svg+xml;base64," +
                         btoa(`
-                           <svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'>
-                              <circle cx='${size / 2}' cy='${size / 2}' r='${
+                   <svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'>
+                      <circle cx='${size / 2}' cy='${size / 2}' r='${
                            size / 2
                         }' fill='${color}' />
-                           </svg>
-                        `),
+                   </svg>
+                `),
                      new kakao.maps.Size(size, size),
                      { offset: new kakao.maps.Point(size / 2, size / 2) }
                   ),
@@ -156,6 +175,18 @@ function FirefighterPage() {
                   return;
                }
 
+               // fireStation 위치 유효성 체크
+               if (
+                  typeof fireStation.latitude !== "number" ||
+                  typeof fireStation.longitude !== "number"
+               ) {
+                  console.error(
+                     "❌ 소방서 위치 정보가 유효하지 않습니다:",
+                     fireStation
+                  );
+                  return;
+               }
+
                let closestHydrant = nearbyHydrants[0];
                let minDist = getDistance(
                   fireStation.latitude,
@@ -198,25 +229,11 @@ function FirefighterPage() {
                      return;
                   }
 
-                  // const linePath = [];
-                  // const roads = res.data.routes[0].sections[0].roads;
-                  // roads.forEach((road) => {
-                  //    const vtx = road.vertexes;
-                  //    for (let i = 0; i < vtx.length; i += 2) {
-                  //       const lng = vtx[i];
-                  //       const lat = vtx[i + 1];
-                  //       linePath.push(new kakao.maps.LatLng(lat, lng));
-                  //    }
-                  // });
-
-                  // 경로 polyline 그리기 개선
                   const linePath = [];
 
                   res.data.routes[0].sections.forEach((section) => {
                      section.roads.forEach((road) => {
-                        // 너무 짧은 선 생략 (옵션)
                         if (road.distance < 5) return;
-
                         const vtx = road.vertexes;
                         for (let i = 0; i < vtx.length; i += 2) {
                            const lng = vtx[i];
@@ -257,26 +274,47 @@ function FirefighterPage() {
       };
    }, [report, fireStation, hydrants]);
 
-   if (!report) return <p>데이터 불러오는 중...</p>;
+   // 데이터 로딩 상태 및 에러 처리
+   if (report === undefined) return <p>데이터 불러오는 중...</p>;
+   if (report === null) return <p>❌ 신고 데이터를 불러오지 못했습니다.</p>;
+   if (fireStation === undefined) return <p>데이터 불러오는 중...</p>;
+   if (fireStation === null)
+      return <p>❌ 소방서 데이터를 불러오지 못했습니다.</p>;
+   if (hydrants.length === 0)
+      return <p>❌ 소화전 데이터를 불러오지 못했습니다.</p>;
 
    return (
       <div>
          <h2>🚒 소방관 출동 화면</h2>
          <p>
-            신고자 위치: {report.reporterLat.toFixed(6)},{" "}
-            {report.reporterLng.toFixed(6)} <br />
+            신고자 위치:{" "}
+            {report.reporterLat != null && report.reporterLng != null
+               ? `${report.reporterLat.toFixed(
+                    6
+                 )}, ${report.reporterLng.toFixed(6)}`
+               : "정보 없음"}
+            <br />
             신고자 주소: {report.reporterAddress || "-"}
          </p>
          <p>
-            화재 위치: {report.fireLat.toFixed(6)}, {report.fireLng.toFixed(6)}{" "}
+            화재 위치:{" "}
+            {report.fireLat != null && report.fireLng != null
+               ? `${report.fireLat.toFixed(6)}, ${report.fireLng.toFixed(6)}`
+               : "정보 없음"}
             <br />
             화재 주소: {report.fireAddress || "-"}
          </p>
          {fireStation && (
             <p>
-               소방서 위치: {fireStation.latitude.toFixed(6)},{" "}
-               {fireStation.longitude.toFixed(6)} <br />
-               소방서 주소: {fireStation.address} <br />
+               소방서 위치:{" "}
+               {fireStation.latitude != null && fireStation.longitude != null
+                  ? `${fireStation.latitude.toFixed(
+                       6
+                    )}, ${fireStation.longitude.toFixed(6)}`
+                  : "정보 없음"}
+               <br />
+               소방서 주소: {fireStation.address || "-"}
+               <br />
                소방서 이름: {fireStation.centerName || "-"}
             </p>
          )}
@@ -286,10 +324,12 @@ function FirefighterPage() {
          ></div>
 
          <button
-            className="mt-4 bg-red-600 text-white px-4 py-2 rounded"
-            onClick={() => alert("상황 보고 기능은 추후 구현 예정")}
+            onClick={() => {
+               alert("기능 구현 준비");
+            }}
+            className="bg-blue-500 text-white px-3 py-1 rounded"
          >
-            상황 보고하기
+            상황 보고
          </button>
       </div>
    );

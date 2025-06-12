@@ -56,11 +56,19 @@ function DashboardPage() {
    };
 
    const handleDispatch = async (reportToken, fireStationId) => {
+      console.log("handleDispatch 호출", reportToken, fireStationId);
       try {
+         if (!reportToken || !fireStationId) {
+            alert("토큰 또는 소방서 ID가 없습니다.");
+            return;
+         }
+
+         console.log("출동 요청:", reportToken, fireStationId);
+
          const response = await axios.post(`${apiUrl}/fire-dispatches`, {
             reportToken,
             fireStationId,
-            status: "dispatched",
+            status: "DISPATCHED", // 💥 대문자 enum 사용
          });
 
          const createdDispatch = response.data;
@@ -80,7 +88,7 @@ function DashboardPage() {
          );
       } catch (error) {
          alert("❌ 출동 지시 실패");
-         console.error("🚨 출동 지시 에러:", error);
+         console.error("🚨 출동 지시 에러:", error.response || error);
       }
    };
 
@@ -232,9 +240,6 @@ function DashboardPage() {
                         <th className="px-4 py-2">주소</th>
                         <th className="px-4 py-2">전화번호</th>
                         <th className="px-4 py-2">거리 (km)</th>
-                        <th className="px-4 py-2">가용 인원</th>
-                        <th className="px-4 py-2">출동 중</th>
-                        <th className="px-4 py-2">사다리차</th>
                         <th className="px-4 py-2">출동 지시</th>
                      </tr>
                   </thead>
@@ -258,24 +263,24 @@ function DashboardPage() {
                                  {station.distance.toFixed(2)}
                               </td>
                               <td className="px-4 py-2">
-                                 {station.availablePersonnel}
-                              </td>
-                              <td className="px-4 py-2">
-                                 {station.isDispatching ? "출동 중" : "대기 중"}
-                              </td>
-                              <td className="px-4 py-2">
-                                 {station.hasLadderTruck ? "보유" : "없음"}
-                              </td>
-                              <td className="px-4 py-2">
                                  <button
                                     className="px-3 py-1 text-sm rounded bg-green-500 text-white hover:bg-green-600"
-                                    onClick={() =>
+                                    onClick={() => {
+                                       console.log("📌 station:", station);
+                                       console.log(
+                                          "📌 station.id:",
+                                          station?.id
+                                       );
+                                       console.log(
+                                          "📌 reportToken:",
+                                          selectedReport?.token
+                                       );
                                        selectedReport?.token &&
-                                       handleDispatch(
-                                          selectedReport.token,
-                                          station.id
-                                       )
-                                    }
+                                          handleDispatch(
+                                             selectedReport.token,
+                                             station.id
+                                          );
+                                    }}
                                  >
                                     출동 지시
                                  </button>
