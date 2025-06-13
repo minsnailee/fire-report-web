@@ -339,7 +339,7 @@ function FirefighterPage() {
       <div>
          <h2>🚒 소방관 출동 화면</h2>
          <p>
-            신고자 위치:{" "}
+            신고자 위치:
             {report.reporterLat != null && report.reporterLng != null
                ? `${report.reporterLat.toFixed(
                     6
@@ -349,7 +349,7 @@ function FirefighterPage() {
             신고자 주소: {report.reporterAddress || "-"}
          </p>
          <p>
-            화재 위치:{" "}
+            화재 위치:
             {report.fireLat != null && report.fireLng != null
                ? `${report.fireLat.toFixed(6)}, ${report.fireLng.toFixed(6)}`
                : "정보 없음"}
@@ -358,7 +358,7 @@ function FirefighterPage() {
          </p>
          {fireStation && (
             <p>
-               소방서 위치:{" "}
+               소방서 위치:
                {fireStation.latitude != null && fireStation.longitude != null
                   ? `${fireStation.latitude.toFixed(
                        6

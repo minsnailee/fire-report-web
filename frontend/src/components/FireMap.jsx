@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
 
 function FireMap() {
+   const navigate = useNavigate();
+
    const KAKAO_MAP_KEY = import.meta.env.VITE_KAKAO_MAP_KEY;
    const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -239,6 +242,9 @@ function FireMap() {
          const response = await axios.post(`${apiUrl}/fire-reports`, payload);
          console.log("✅ 서버 응답:", response.data);
          alert("신고 위치가 전송되었습니다!");
+
+         // 전송 성공 후 ChatBotPage로 이동
+         navigate("/chatbot");
       } catch (error) {
          console.error(
             "❌ 신고 전송 실패:",
@@ -257,7 +263,7 @@ function FireMap() {
                id="map"
                style={{
                   width: "100vw",
-                  height: "100vh",
+                  height: "70vh",
                   position: "relative",
                   border: "1px solid #ccc",
                }}
@@ -267,7 +273,7 @@ function FireMap() {
                <p>🧍‍♂️ 신고자 위치 (GPS)</p>
                {reporterPos && (
                   <p style={{ fontSize: "0.9em" }}>
-                     위도: {reporterPos.getLat().toFixed(6)} / 경도:{" "}
+                     위도: {reporterPos.getLat().toFixed(6)} / 경도:
                      {reporterPos.getLng().toFixed(6)}
                   </p>
                )}
@@ -288,7 +294,7 @@ function FireMap() {
                <p>🔥 화재 발생 위치 (지도 중심)</p>
                {firePos && (
                   <p style={{ fontSize: "0.9em" }}>
-                     위도: {firePos.getLat().toFixed(6)} / 경도:{" "}
+                     위도: {firePos.getLat().toFixed(6)} / 경도:
                      {firePos.getLng().toFixed(6)}
                   </p>
                )}

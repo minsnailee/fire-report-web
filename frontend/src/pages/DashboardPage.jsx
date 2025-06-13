@@ -222,7 +222,7 @@ function DashboardPage() {
                   🗺️ 신고 위치 지도 보기 (ID: {selectedReport.id})
                </h3>
                <p>
-                  🔑 <strong>토큰 :</strong>{" "}
+                  🔑 <strong>토큰 :</strong>
                   <code>{selectedReport?.token ?? "없음"}</code>
                </p>
                <MapPreview
