@@ -1,120 +1,133 @@
 function translateStatus(status) {
-   switch (status?.toLowerCase()) {
-      case "reported":
+   switch (status) {
+      case "RECEIVED":
          return "신고 접수됨";
-      case "dispatched":
+      case "DISPATCHED":
          return "출동 지시됨";
-      case "en_route":
-         return "진입 중";
-      case "suppressing":
-         return "진압 중";
-      case "additional_support":
-         return "추가 지원 요청됨";
-      case "suppression_completed":
-         return "진압 완료";
-      case "site_recovery":
-         return "현장 복구 중";
-      case "resolved":
-         return "종료";
+      case "ARRIVED":
+         return "현장 도착";
+      case "INITIAL_SUPPRESSION":
+         return "초기 진압";
+      case "OVERHAUL":
+         return "잔불 정리";
+      case "FULLY_SUPPRESSED":
+         return "완전 진압";
+      case "WITHDRAWN":
+         return "철수";
+      case "MONITORING":
+         return "잔불 감시";
       default:
          return "신고 접수됨";
    }
 }
 
+function getStatusBadgeColor(status) {
+   switch (status) {
+      case "RECEIVED":
+         return "bg-gray-100 text-gray-600";
+      case "DISPATCHED":
+         return "bg-blue-100 text-blue-600";
+      case "ARRIVED":
+         return "bg-indigo-100 text-indigo-600";
+      case "INITIAL_SUPPRESSION":
+         return "bg-orange-100 text-orange-600";
+      case "OVERHAUL":
+         return "bg-yellow-100 text-yellow-600";
+      case "FULLY_SUPPRESSED":
+         return "bg-green-100 text-green-600";
+      case "WITHDRAWN":
+         return "bg-red-100 text-red-600";
+      case "MONITORING":
+         return "bg-purple-100 text-purple-600";
+      default:
+         return "bg-gray-100 text-gray-600";
+   }
+}
+
 export default function ReportTable({ reports, onSelect }) {
    return (
-      <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="rounded-2xl border border-gray-200 bg-white">
          <div className="px-6 py-5">
-            <h3 className="text-base font-medium text-gray-800 dark:text-white/90">
-               신고 목록
-            </h3>
+            <h3 className="text-base font-medium text-gray-800">신고 목록</h3>
          </div>
-         <div className="p-4 border-t border-gray-100 dark:border-gray-800 sm:p-6">
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+         <div className="p-4 border-t border-gray-100 sm:p-6">
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
                <div className="max-w-full overflow-x-auto">
                   <table className="min-w-full text-sm">
-                     <thead className="border-b border-gray-100 dark:border-white/[0.05] bg-neutral-50 dark:bg-white/[0.01]">
+                     <thead className="border-b border-gray-100 bg-neutral-50">
                         <tr>
-                           <th className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
+                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
                               ID
                            </th>
-                           <th className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
-                              신고자 위도
-                           </th>
-                           <th className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
-                              신고자 경도
-                           </th>
-                           <th className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
+                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
                               신고자 주소
                            </th>
-                           <th className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
-                              화재 위도
+                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
+                              신고자 위도
                            </th>
-                           <th className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
-                              화재 경도
+                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
+                              신고자 경도
                            </th>
-                           <th className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
+                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-900 bg-red-50">
                               화재 주소
                            </th>
-                           <th className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
+                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-900 bg-red-50">
+                              화재 위도
+                           </th>
+                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-900 bg-red-50">
+                              화재 경도
+                           </th>
+                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
                               시간
                            </th>
-                           <th className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
+                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
                               상태
                            </th>
-                           <th className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
+                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
                               상세보기
                            </th>
                         </tr>
                      </thead>
-                     <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                     <tbody className="divide-y divide-gray-100">
                         {reports.map((report) => (
                            <tr key={report.id}>
-                              <td className="px-6 py-4 text-gray-700 dark:text-white/90">
+                              <td className="text-center px-6 py-4 text-gray-700">
                                  {report.id}
                               </td>
-                              <td className="px-6 py-4 text-gray-700 dark:text-white/90">
+                              <td className="text-center px-6 py-4 text-gray-700">
+                                 {report.reporterAddress}
+                              </td>
+                              <td className="text-center px-6 py-4 text-gray-700">
                                  {report.reporterLat.toFixed(4)}
                               </td>
-                              <td className="px-6 py-4 text-gray-700 dark:text-white/90">
+                              <td className="text-center px-6 py-4 text-gray-700">
                                  {report.reporterLng.toFixed(4)}
                               </td>
-                              <td className="px-6 py-4 text-gray-700 dark:text-white/90">
-                                 {report.reporterAddress || "-"}
+                              <td className="text-center px-6 py-4 bg-red-100 text-red-800">
+                                 {report.fireAddress}
                               </td>
-                              <td className="px-6 py-4 text-gray-700 dark:text-white/90">
+                              <td className="text-center px-6 py-4 bg-red-100 text-red-800">
                                  {report.fireLat.toFixed(4)}
                               </td>
-                              <td className="px-6 py-4 text-gray-700 dark:text-white/90">
+                              <td className="text-center px-6 py-4 bg-red-100 text-red-800">
                                  {report.fireLng.toFixed(4)}
                               </td>
-                              <td className="px-6 py-4 text-gray-700 dark:text-white/90">
-                                 {report.fireAddress || "-"}
-                              </td>
-                              <td className="px-6 py-4 text-gray-700 dark:text-white/90">
+                              <td className="text-center px-6 py-4 text-gray-700">
                                  {new Date(report.reportedAt).toLocaleString()}
                               </td>
-                              <td className="px-6 py-4">
+                              <td className="text-center px-6 py-4">
                                  <span
-                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-medium text-xs
-                    ${
-                       report.status === "active"
-                          ? "bg-green-50 text-green-600 dark:bg-green-500/15 dark:text-green-400"
-                          : report.status === "pending"
-                          ? "bg-yellow-50 text-yellow-600 dark:bg-yellow-500/15 dark:text-yellow-400"
-                          : report.status === "cancel"
-                          ? "bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-400"
-                          : "bg-gray-100 text-gray-600 dark:bg-white/[0.08] dark:text-white/80"
-                    }
-                  `}
+                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-medium text-xs ${getStatusBadgeColor(
+                                       report.status
+                                    )}`}
                                  >
                                     {translateStatus(report.status)}
                                  </span>
                               </td>
-                              <td className="px-6 py-4">
+                              <td className="text-center px-6 py-4">
                                  <button
                                     onClick={() => onSelect(report)}
-                                    className="text-blue-600 hover:underline dark:text-blue-400"
+                                    className="text-blue-600 hover:underline"
                                  >
                                     보기
                                  </button>
