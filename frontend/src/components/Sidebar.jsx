@@ -1,21 +1,21 @@
 import { NavLink } from "react-router-dom";
 
+import { CiViewBoard, CiViewList, CiCircleCheck } from "react-icons/ci";
 import {
-   CiGrid32,
-   CiViewBoard,
-   CiViewList,
-   CiCircleCheck,
-   CiUser,
-} from "react-icons/ci";
-import {
-   PiFireExtinguisherThin,
-   PiListChecksThin,
-   PiChartBarThin,
-   PiDownloadSimpleThin,
-   PiSirenThin,
-   PiFireTruckThin,
+   PiFireExtinguisher,
+   PiListChecks,
+   PiChartBar,
+   PiDownloadSimple,
+   PiSiren,
+   PiFireTruck,
+   PiChartPieSlice,
+   PiUserList,
+   PiClipboardText,
+   PiShieldCheck,
+   PiFire,
 } from "react-icons/pi";
 import { HiLocationMarker } from "react-icons/hi";
+import { RxDashboard, RxPerson } from "react-icons/rx";
 
 const menuGroups = [
    {
@@ -24,28 +24,32 @@ const menuGroups = [
          {
             name: "실시간 현황",
             path: "/dashboard",
-            icon: <CiGrid32 className="text-lg" />,
+            icon: <RxDashboard className="text-lg flex-none" />,
          },
          {
             name: "화재 위험 예측",
             path: "/fire-risk",
-            icon: <CiViewBoard className="text-lg" />,
+            icon: <PiChartPieSlice className="text-xl flex-none" />,
          },
       ],
    },
    {
       title: "신고 관리",
       items: [
-         { name: "모든 신고 보기", path: "/reports/all", icon: <CiViewList /> },
+         {
+            name: "모든 신고 보기",
+            path: "/reports/all",
+            icon: <PiClipboardText className="text-xl flex-none" />,
+         },
          {
             name: "출동 지시된 신고",
             path: "/reports/dispatched",
-            icon: <PiFireExtinguisherThin className="text-lg" />,
+            icon: <PiFire className="text-xl flex-none" />,
          },
          {
             name: "완료된 신고",
             path: "/reports/completed",
-            icon: <CiCircleCheck className="text-lg" />,
+            icon: <PiShieldCheck className="text-xl flex-none" />,
          },
       ],
    },
@@ -55,7 +59,7 @@ const menuGroups = [
          {
             name: "출동 이력",
             path: "/dispatches",
-            icon: <PiListChecksThin className="text-lg" />,
+            icon: <PiListChecks className="text-xl flex-none" />,
          },
       ],
    },
@@ -65,12 +69,12 @@ const menuGroups = [
          {
             name: "지역별 화재 발생 추이",
             path: "/stats/area",
-            icon: <PiChartBarThin className="text-lg" />,
+            icon: <PiChartBar className="text-xl flex-none" />,
          },
          {
             name: "월간/주간 리포트 다운로드",
             path: "/stats/reports",
-            icon: <PiDownloadSimpleThin className="text-lg" />,
+            icon: <PiDownloadSimple className="text-xl flex-none" />,
          },
       ],
    },
@@ -80,22 +84,22 @@ const menuGroups = [
          {
             name: "사용자 관리",
             path: "/settings/users",
-            icon: <CiUser className="text-lg" />,
+            icon: <PiUserList className="text-lg flex-none" />,
          },
          {
             name: "응급실 정보 관리",
             path: "/settings/hospitals",
-            icon: <PiSirenThin className="text-lg" />,
+            icon: <PiSiren className="text-xl flex-none" />,
          },
          {
             name: "소화전 정보 관리",
             path: "/settings/hydrants",
-            icon: <PiFireExtinguisherThin className="text-lg" />,
+            icon: <PiFireExtinguisher className="text-xl flex-none" />,
          },
          {
             name: "소방서 정보 관리",
             path: "/settings/stations",
-            icon: <PiFireTruckThin className="text-lg" />,
+            icon: <PiFireTruck className="text-xl flex-none" />,
          },
       ],
    },

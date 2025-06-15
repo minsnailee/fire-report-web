@@ -1,9 +1,12 @@
+import { useState } from "react";
+import { LiaToggleOffSolid, LiaToggleOnSolid } from "react-icons/lia";
+
 function translateStatus(status) {
    switch (status) {
       case "RECEIVED":
-         return "신고 접수됨";
+         return "신고 접수";
       case "DISPATCHED":
-         return "출동 지시됨";
+         return "출동 지시";
       case "ARRIVED":
          return "현장 도착";
       case "INITIAL_SUPPRESSION":
@@ -17,7 +20,7 @@ function translateStatus(status) {
       case "MONITORING":
          return "잔불 감시";
       default:
-         return "신고 접수됨";
+         return "신고 접수";
    }
 }
 
@@ -45,11 +48,27 @@ function getStatusBadgeColor(status) {
 }
 
 export default function ReportTable({ reports, onSelect }) {
+   const [showLatLng, setShowLatLng] = useState(false);
+
    return (
       <div className="rounded-2xl border border-gray-200 bg-white">
-         <div className="px-6 py-5">
+         <div className="px-6 py-4 flex justify-between items-center">
             <h3 className="text-base font-medium text-gray-800">신고 목록</h3>
+            <button
+               onClick={() => setShowLatLng((prev) => !prev)}
+               className="flex items-center gap-2 text-gray-600 hover:text-gray-650"
+               aria-label="위경도로 보기 토글"
+               type="button"
+            >
+               <span className="text-sm select-none">위경도로 보기</span>
+               {showLatLng ? (
+                  <LiaToggleOnSolid size={24} />
+               ) : (
+                  <LiaToggleOffSolid size={24} />
+               )}
+            </button>
          </div>
+
          <div className="p-4 border-t border-gray-100 sm:p-6">
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
                <div className="max-w-full overflow-x-auto">
@@ -59,24 +78,33 @@ export default function ReportTable({ reports, onSelect }) {
                            <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
                               ID
                            </th>
-                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
-                              신고자 주소
-                           </th>
-                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
-                              신고자 위도
-                           </th>
-                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
-                              신고자 경도
-                           </th>
-                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-900 bg-red-50">
-                              화재 주소
-                           </th>
-                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-900 bg-red-50">
-                              화재 위도
-                           </th>
-                           <th className="px-6 py-4 text-center text-xs font-medium text-gray-900 bg-red-50">
-                              화재 경도
-                           </th>
+                           {!showLatLng && (
+                              <>
+                                 <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
+                                    신고자 주소
+                                 </th>
+                                 <th className="px-6 py-4 text-center text-xs font-medium text-gray-900 bg-red-100">
+                                    화재 주소
+                                 </th>
+                              </>
+                           )}
+                           {showLatLng && (
+                              <>
+                                 <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
+                                    신고자 위도
+                                 </th>
+                                 <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
+                                    신고자 경도
+                                 </th>
+                                 <th className="px-6 py-4 text-center text-xs font-medium text-gray-900 bg-red-100">
+                                    화재 위도
+                                 </th>
+                                 <th className="px-6 py-4 text-center text-xs font-medium text-gray-900 bg-red-100">
+                                    화재 경도
+                                 </th>
+                              </>
+                           )}
+
                            <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
                               시간
                            </th>
@@ -88,33 +116,46 @@ export default function ReportTable({ reports, onSelect }) {
                            </th>
                         </tr>
                      </thead>
+
                      <tbody className="divide-y divide-gray-100">
                         {reports.map((report) => (
                            <tr key={report.id}>
                               <td className="text-center px-6 py-4 text-gray-700">
                                  {report.id}
                               </td>
-                              <td className="text-center px-6 py-4 text-gray-700">
-                                 {report.reporterAddress}
-                              </td>
-                              <td className="text-center px-6 py-4 text-gray-700">
-                                 {report.reporterLat.toFixed(4)}
-                              </td>
-                              <td className="text-center px-6 py-4 text-gray-700">
-                                 {report.reporterLng.toFixed(4)}
-                              </td>
-                              <td className="text-center px-6 py-4 bg-red-100 text-red-800">
-                                 {report.fireAddress}
-                              </td>
-                              <td className="text-center px-6 py-4 bg-red-100 text-red-800">
-                                 {report.fireLat.toFixed(4)}
-                              </td>
-                              <td className="text-center px-6 py-4 bg-red-100 text-red-800">
-                                 {report.fireLng.toFixed(4)}
-                              </td>
+
+                              {!showLatLng && (
+                                 <>
+                                    <td className="text-center px-6 py-4 text-gray-700">
+                                       {report.reporterAddress}
+                                    </td>
+                                    <td className="text-center px-6 py-4 bg-red-50 text-red-800 border-b border-b-white">
+                                       {report.fireAddress}
+                                    </td>
+                                 </>
+                              )}
+
+                              {showLatLng && (
+                                 <>
+                                    <td className="text-center px-6 py-4 text-gray-700">
+                                       {report.reporterLat.toFixed(4)}
+                                    </td>
+                                    <td className="text-center px-6 py-4 text-gray-700">
+                                       {report.reporterLng.toFixed(4)}
+                                    </td>
+                                    <td className="text-center px-6 py-4 bg-red-50 text-red-800 border-b border-b-white">
+                                       {report.fireLat.toFixed(4)}
+                                    </td>
+                                    <td className="text-center px-6 py-4 bg-red-50 text-red-800 border-b border-b-white">
+                                       {report.fireLng.toFixed(4)}
+                                    </td>
+                                 </>
+                              )}
+
                               <td className="text-center px-6 py-4 text-gray-700">
                                  {new Date(report.reportedAt).toLocaleString()}
                               </td>
+
                               <td className="text-center px-6 py-4">
                                  <span
                                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-medium text-xs ${getStatusBadgeColor(
@@ -124,6 +165,7 @@ export default function ReportTable({ reports, onSelect }) {
                                     {translateStatus(report.status)}
                                  </span>
                               </td>
+
                               <td className="text-center px-6 py-4">
                                  <button
                                     onClick={() => onSelect(report)}

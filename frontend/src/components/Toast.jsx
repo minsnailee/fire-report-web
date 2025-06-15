@@ -10,7 +10,7 @@ const Toast = ({ message, onClose }) => {
 
    return (
       <div
-         className="fixed bottom-5 right-5 flex items-center w-full max-w-xs p-4 text-gray-700 bg-white rounded-lg shadow-sm z-50"
+         className="fixed bottom-5 right-5 flex items-center w-full max-w-xs p-4 text-gray-700 bg-white rounded-lg shadow-lg z-[500] border"
          role="alert"
       >
          <div className="inline-flex items-center justify-center shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg">

@@ -36,3 +36,8 @@ body {
          0 0 13px 13px rgba(255, 0, 0, 0);
    }
 }
+
+.leaflet-control-container {
+   z-index: -1;
+   display: none;
+}

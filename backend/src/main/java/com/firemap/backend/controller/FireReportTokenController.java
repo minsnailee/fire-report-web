@@ -1,4 +1,7 @@
 package com.firemap.backend.controller;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,5 +31,17 @@ public class FireReportTokenController {
     public ResponseEntity<Boolean> validateToken(@PathVariable String token) {
         boolean valid = tokenService.isValidToken(token);
         return ResponseEntity.ok(valid);
+    }
+
+    // 토큰 전체 목록 조회 API 추가
+    @GetMapping("/all")
+    public ResponseEntity<List<String>> getAllTokens() {
+        // FireReportTokenEntity 리스트를 토큰 문자열 리스트로 변환
+        List<FireReportTokenEntity> tokens = tokenService.getAllTokens();
+        List<String> tokenStrings = tokens.stream()
+            .map(FireReportTokenEntity::getToken)
+            .collect(Collectors.toList());
+
+        return ResponseEntity.ok(tokenStrings);
     }
 }

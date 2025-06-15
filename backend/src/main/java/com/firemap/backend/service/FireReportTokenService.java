@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.firemap.backend.entity.FireReportTokenEntity;
 import com.firemap.backend.repository.FireReportTokenRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -41,5 +42,10 @@ public class FireReportTokenService {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    // 전체 토큰 목록 조회 추가
+    public List<FireReportTokenEntity> getAllTokens() {
+        return tokenRepository.findAll();
     }
 }
