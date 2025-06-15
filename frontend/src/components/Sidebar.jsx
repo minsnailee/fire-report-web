@@ -112,7 +112,7 @@ export default function Sidebar({ isOpen }) {
             isOpen ? "w-64" : "w-16"
          } h-screen fixed left-0 top-0 z-20 flex flex-col`}
       >
-         <div className="flex items-center justify-center h-16 font-[800] text-2xl font-suit text-[#3E7EFF] tracking-tight">
+         <div className="flex items-center justify-center h-16 font-[900] text-[27px] font-suit text-[#3E7EFF] tracking-[-.09em]">
             <HiLocationMarker />
             {isOpen ? "JusoCraft" : ""}
          </div>
