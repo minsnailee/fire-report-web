@@ -110,8 +110,12 @@ function DashboardPage() {
          <div className="flex flex-col xl:flex-row gap-6">
             <div className="w-full xl:w-2/3 flex flex-col gap-6">
                {/* 신고 테이블 */}
-               <ReportTable
+               {/* <ReportTable
                   reports={reports}
+                  onSelect={(report) => setSelectedReport(report)}
+               /> */}
+               <ReportTable
+                  reports={reports.filter((r) => r.inputStatus === "REPORTED")}
                   onSelect={(report) => setSelectedReport(report)}
                />
 

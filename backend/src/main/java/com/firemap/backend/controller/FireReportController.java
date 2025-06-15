@@ -11,6 +11,7 @@ import com.firemap.backend.service.FireReportService;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 // @CrossOrigin(origins = "*")
 // @RestController
@@ -83,4 +84,11 @@ public class FireReportController {
     public FireReportDto getReportByToken(@PathVariable String token) {
         return fireReportService.getReportByToken(token);
     }
+
+    public List<FireReportDto> getReportedOnly() {
+    return fireReportService.getReportedReports()
+        .stream()
+        .map(FireReportDto::from)
+        .collect(Collectors.toList());
+}
 }

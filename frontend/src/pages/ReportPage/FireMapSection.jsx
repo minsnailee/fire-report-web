@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 
 import useFireMap from "./hooks/useFireMap";
 import LocationInfo from "./LocationInfo";
-import SubmitButton from "./SubmitButton";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { MdSwipeVertical } from "react-icons/md";
 
@@ -51,7 +50,12 @@ function FireMapSection() {
                reporterAddress={reporterAddress}
             />
 
-            <SubmitButton handleSubmit={handleSubmit} />
+            <button
+               onClick={handleSubmit}
+               className="tracking-wider px-6 py-3 text-white rounded-xl text-xl font-hakgyoansim bg-gradient-to-br from-blue-500 to-indigo-600"
+            >
+               신고 위치 전송하기
+            </button>
          </div>
       </div>
    );

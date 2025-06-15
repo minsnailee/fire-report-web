@@ -374,9 +374,9 @@ function FirefighterPage() {
             id="firefighter-map"
             style={{ width: "100%", height: "400px", border: "1px solid #ccc" }}
          ></div>
-         <p>
+         {/* <p>
             🔥 화재 상태: <strong>{report.status}</strong>
-         </p>
+         </p> */}
          <button
             className="bg-blue-500 text-white px-3 py-1 rounded mt-3"
             onClick={() => setStatusSelectVisible(!statusSelectVisible)}

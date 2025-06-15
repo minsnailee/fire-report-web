@@ -3,7 +3,10 @@ package com.firemap.backend.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.firemap.backend.entity.FireReportEntity;
 import com.firemap.backend.entity.FireReportTokenEntity;
+import com.firemap.backend.enums.ReportInputStatus;
+import com.firemap.backend.repository.FireReportRepository;
 import com.firemap.backend.repository.FireReportTokenRepository;
 
 import java.util.List;
@@ -13,28 +16,39 @@ import java.util.UUID;
 @Transactional
 public class FireReportTokenService {
 
-    private final FireReportTokenRepository tokenRepository;
+    private final FireReportTokenRepository fireReportTokenRepository;
+    private final FireReportRepository fireReportRepository;
 
-    public FireReportTokenService(FireReportTokenRepository tokenRepository) {
-        this.tokenRepository = tokenRepository;
+    public FireReportTokenService(FireReportTokenRepository fireReportTokenRepository,
+                                  FireReportRepository fireReportRepository) {
+        this.fireReportTokenRepository = fireReportTokenRepository;
+        this.fireReportRepository = fireReportRepository;
     }
 
-    // 새로운 토큰 생성 및 저장
-    public FireReportTokenEntity createToken() {
-        String token = UUID.randomUUID().toString();
-        FireReportTokenEntity fireReportToken = FireReportTokenEntity.builder()
-            .token(token)
+    // 관제센터에서 URL 생성 시 호출
+    public String createReportWithToken(String phone, String content) {
+        System.out.println(phone); // 저장할 전화번호
+        System.out.println(content); // 저장할 메모
+
+        FireReportTokenEntity token = FireReportTokenEntity.builder()
+            .token(UUID.randomUUID().toString())
             .build();
-        return tokenRepository.save(fireReportToken);
+        fireReportTokenRepository.save(token);
+
+        FireReportEntity report = FireReportEntity.builder()
+            .reportToken(token)
+            .reporterPhone(phone)
+            .reportContent(content)
+            .inputStatus(ReportInputStatus.PENDING)
+            .build();
+        fireReportRepository.save(report);
+
+        return token.getToken();
     }
 
-    // 토큰 존재 여부 확인
-    // public boolean isValidToken(String token) {
-    //     return tokenRepository.findByToken(token).isPresent();
-    // }
     public boolean isValidToken(String token) {
         try {
-            boolean result = tokenRepository.findByToken(token).isPresent();
+            boolean result = fireReportTokenRepository.findByToken(token).isPresent();
             System.out.println("✅ 토큰 유효성 검사 결과: " + result);
             return result;
         } catch (Exception e) {
@@ -44,8 +58,15 @@ public class FireReportTokenService {
         }
     }
 
-    // 전체 토큰 목록 조회 추가
+    public FireReportTokenEntity createToken() {
+        String token = UUID.randomUUID().toString();
+        FireReportTokenEntity fireReportToken = FireReportTokenEntity.builder()
+            .token(token)
+            .build();
+        return fireReportTokenRepository.save(fireReportToken);
+    }
+
     public List<FireReportTokenEntity> getAllTokens() {
-        return tokenRepository.findAll();
+        return fireReportTokenRepository.findAll();
     }
 }

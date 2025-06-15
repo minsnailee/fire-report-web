@@ -12,8 +12,11 @@ function UrlTable({ urls, reports }) {
                   <table className="min-w-full text-sm">
                      <thead className="border-b border-gray-100 bg-neutral-50">
                         <tr>
-                           <th className="px-4 py-4 text-center text-xs font-medium text-gray-500 whitespace-nowrap">
+                           <th className="px-4 py-4 text-center text-xs font-medium text-gray-500">
                               신고 ID
+                           </th>
+                           <th className="px-4 py-4 text-center text-xs font-medium text-gray-500">
+                              연락처
                            </th>
                            <th className="px-2 py-4 text-center text-xs font-medium text-gray-500">
                               URL
@@ -22,7 +25,6 @@ function UrlTable({ urls, reports }) {
                      </thead>
                      <tbody className="divide-y divide-gray-100">
                         {urls.map((entry, idx) => {
-                           // urls 배열의 entry.reportId가 신고 목록에 있는지 확인
                            const matchedReport = reports.find(
                               (r) => r.id === entry.reportId
                            );
@@ -35,6 +37,11 @@ function UrlTable({ urls, reports }) {
                                     ) : (
                                        <span className="text-sm">미제출</span>
                                     )}
+                                 </td>
+                                 <td className="px-2 py-2 text-gray-700 text-center">
+                                    {matchedReport?.reporterPhone ||
+                                       entry.phone ||
+                                       "-"}
                                  </td>
                                  <td className="px-2 py-4 text-blue-600 break-all text-left text-sm max-w-[400px] truncate whitespace-nowrap overflow-hidden">
                                     <a

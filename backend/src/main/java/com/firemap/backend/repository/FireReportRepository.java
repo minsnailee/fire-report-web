@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.firemap.backend.entity.FireReportEntity;
 import com.firemap.backend.entity.FireReportTokenEntity;
+import com.firemap.backend.enums.ReportInputStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,4 +35,6 @@ public interface FireReportRepository extends JpaRepository<FireReportEntity, Lo
 
     @Query("SELECT fr FROM FireReportEntity fr JOIN FETCH fr.reportToken")
     List<FireReportEntity> findAllWithToken();
+
+    List<FireReportEntity> findByInputStatus(ReportInputStatus inputStatus);
 }

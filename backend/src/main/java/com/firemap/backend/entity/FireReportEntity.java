@@ -5,7 +5,9 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.firemap.backend.enums.FireReportStatus; 
+import com.firemap.backend.enums.FireReportStatus;
+import com.firemap.backend.enums.ReportInputStatus;
+
 import java.util.ArrayList; 
 // @Entity
 // @Table(name = "fire_reports")
@@ -74,28 +76,38 @@ public class FireReportEntity {
     @JoinColumn(name = "report_token_id", nullable = false)
     private FireReportTokenEntity reportToken;
 
-    @Column(nullable = false)
-    private double reporterLat;
+    @Column(nullable = true)
+    private Double reporterLat;
 
-    @Column(nullable = false)
-    private double reporterLng;
+    @Column(nullable = true)
+    private Double reporterLng;
 
-    @Column(nullable = false)
-    private double fireLat;
+    @Column(nullable = true)
+    private Double fireLat;
 
-    @Column(nullable = false)
-    private double fireLng;
+    @Column(nullable = true)
+    private Double fireLng;
 
-    @Column(name = "reporter_address", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "reporter_phone", length = 20)
+    private String reporterPhone;
+
+    @Column(name = "report_content", columnDefinition = "TEXT")
+    private String reportContent;
+
+    @Column(name = "reporter_address", columnDefinition = "TEXT", nullable = true)
     private String reporterAddress;
 
-    @Column(name = "fire_address", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "fire_address", columnDefinition = "TEXT", nullable = true)
     private String fireAddress;
 
-    @Column(name = "reported_at", nullable = false)
+    @Column(name = "reported_at", nullable = true)
     private LocalDateTime reportedAt;
 
-    // 하나의 신고에 여러개의 출동
+    @Enumerated(EnumType.STRING)
+    @Column(name = "input_status", nullable = false)
+    private ReportInputStatus inputStatus = ReportInputStatus.PENDING;
+
+    // 하나의 신고에 여러개 출동
     @OneToMany(mappedBy = "fireReport", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FireDispatchEntity> dispatches = new ArrayList<>();
 }

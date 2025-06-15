@@ -19,14 +19,25 @@ export default function GenerateUrl({ onUrlGenerated }) {
    const [toastVisible, setToastVisible] = useState(false);
    const [showRecipientList, setShowRecipientList] = useState(false);
    const [selectedPhoneNumber, setSelectedPhoneNumber] = useState("");
+   const [memoContent, setMemoContent] = useState("");
+
    const apiUrl = import.meta.env.VITE_API_URL;
 
    const generateReportUrl = async () => {
+      if (!selectedPhoneNumber) return;
+
       try {
          setIsLoading(true);
+
+         // 연락처 + 메모 같이 전송 (지금은 메모는 예시로 공백)
          const { data: token } = await axios.post(
-            `${apiUrl}/fire-report-tokens/create`
+            `${apiUrl}/fire-report-tokens/report`,
+            {
+               phone: selectedPhoneNumber,
+               content: memoContent,
+            }
          );
+
          const url = `${window.location.origin}/report?token=${token}`;
          setGeneratedUrl(url);
 
@@ -35,7 +46,8 @@ export default function GenerateUrl({ onUrlGenerated }) {
             onUrlGenerated({
                token,
                url, // reportId는 새로 생성된 신고가 생성되고 나서 따로 받아와야 하므로, 없으면 null로 둠
-               reportId: null,
+               reportId: null, // 아직 신고자는 위치를 제출하지 않았음
+               phone: selectedPhoneNumber,
             }); // 필요한 정보 맞게 전달
          }
       } catch (error) {
@@ -95,7 +107,6 @@ export default function GenerateUrl({ onUrlGenerated }) {
                      </label>
                      <input
                         type="text"
-                        readOnly
                         value={selectedPhoneNumber}
                         placeholder="수신번호를 선택하세요"
                         className="w-full bg-gray-100 border rounded px-3 py-2 mb-2 text-sm"
@@ -131,6 +142,16 @@ export default function GenerateUrl({ onUrlGenerated }) {
                         </div>
                      )}
 
+                     <label className="block text-sm font-medium mb-1">
+                        신고 내용 메모
+                     </label>
+                     <input
+                        type="text"
+                        value={memoContent}
+                        onChange={(e) => setMemoContent(e.target.value)}
+                        placeholder="신고 내용을 입력하세요"
+                        className="w-full bg-white border rounded px-3 py-2 mb-2 text-sm"
+                     />
                      <input
                         type="text"
                         readOnly

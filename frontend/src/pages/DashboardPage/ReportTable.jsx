@@ -53,7 +53,9 @@ export default function ReportTable({ reports, onSelect }) {
    return (
       <div className="rounded-2xl border border-gray-200 bg-white">
          <div className="px-6 py-4 flex justify-between items-center">
-            <h3 className="text-base font-medium text-gray-800">신고 목록</h3>
+            <h3 className="text-base font-medium text-gray-800">
+               위치 입력 완료 목록
+            </h3>
             <button
                onClick={() => setShowReportDetail((prev) => !prev)}
                className="flex items-center gap-2 text-gray-600 hover:text-gray-650"
@@ -92,11 +94,10 @@ export default function ReportTable({ reports, onSelect }) {
 
                            {showReportDetail && (
                               <>
-                                 {/* 기존 위경도 컬럼 대신 대체로 신고자 연락처, 메모 컬럼 표시 */}
                                  <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
                                     신고자 연락처
                                  </th>
-                                 <th className="px-6 py-4 text-center text-xs font-medium text-gray-900">
+                                 <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
                                     신고 내용
                                  </th>
                               </>
@@ -126,7 +127,7 @@ export default function ReportTable({ reports, onSelect }) {
                                     <td className="text-center px-6 py-4 text-gray-700">
                                        {report.reporterAddress}
                                     </td>
-                                    <td className="text-center px-6 py-4 bg-red-50 text-red-800 border-b border-b-white">
+                                    <td className="text-center px-6 py-4 bg-red-50 text-red-800">
                                        {report.fireAddress}
                                     </td>
                                  </>
@@ -137,8 +138,8 @@ export default function ReportTable({ reports, onSelect }) {
                                     <td className="text-center px-6 py-4 text-gray-700">
                                        {report.reporterPhone || "-"}
                                     </td>
-                                    <td className="text-center px-6 py-4 text-red-800 border-b border-b-white whitespace-pre-wrap max-w-xs">
-                                       {report.memo || "-"}
+                                    <td className="text-center px-6 py-4 text-gray-700 whitespace-pre-wrap max-w-xs">
+                                       {report.reportContent || "-"}
                                     </td>
                                  </>
                               )}
