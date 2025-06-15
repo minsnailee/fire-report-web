@@ -1,9 +1,16 @@
 import { useEffect } from "react";
 
-export default function MapPreview({ reporterLat, reporterLng, fireLat, fireLng }) {
+export default function MapPreview({
+   reporterLat,
+   reporterLng,
+   fireLat,
+   fireLng,
+}) {
    useEffect(() => {
       const script = document.createElement("script");
-      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_KEY}&autoload=false`;
+      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${
+         import.meta.env.VITE_KAKAO_MAP_KEY
+      }&autoload=false`;
       script.async = true;
       script.onload = () => {
          window.kakao.maps.load(() => {
@@ -17,7 +24,10 @@ export default function MapPreview({ reporterLat, reporterLng, fireLat, fireLng 
             };
             const map = new window.kakao.maps.Map(container, options);
 
-            const reporterPos = new window.kakao.maps.LatLng(reporterLat, reporterLng);
+            const reporterPos = new window.kakao.maps.LatLng(
+               reporterLat,
+               reporterLng
+            );
             const firePos = new window.kakao.maps.LatLng(fireLat, fireLng);
 
             // 신고자 마커
@@ -62,10 +72,6 @@ export default function MapPreview({ reporterLat, reporterLng, fireLat, fireLng 
    }, [reporterLat, reporterLng, fireLat, fireLng]);
 
    return (
-      <div
-         id="map"
-         style={{ width: "100%", height: "300px", borderRadius: "10px" }}
-         className="mb-4"
-      />
+      <div id="map" className="w-full h-full rounded-xl border min-h-[500px]" />
    );
 }

@@ -6,6 +6,7 @@ import StatsCards from "../../components/StatsCards";
 import GenerateUrl from "../../components/GenerateUrl";
 import UrlTable from "./UrlTable";
 import DashboardMap from "./DashboardMap";
+import ModalWrapper from "../../components/ModalWrapper";
 
 function DashboardPage() {
    const [reports, setReports] = useState([]);
@@ -100,7 +101,6 @@ function DashboardPage() {
    return (
       <div className="flex flex-col gap-8">
          <StatsCards />
-         {/* <GenerateUrl onUrlGenerated={handleNewUrlGenerated} /> */}
          <GenerateUrl
             onUrlGenerated={(newUrlEntry) => {
                setUrls((prev) => [...prev, newUrlEntry]);
@@ -126,11 +126,47 @@ function DashboardPage() {
          </div>
 
          {selectedReport && (
-            <ReportDetail
-               report={selectedReport}
-               fireStations={fireStations}
-               onDispatch={handleDispatch}
-            />
+            <ModalWrapper
+               title={
+                  <div className="flex items-center">
+                     신고 상세 보기
+                     <div className="flex gap-4 text-sm text-gray-500 ml-3">
+                        <p className="font-medium">
+                           <strong className="text-gray-700 font-medium">
+                              ID
+                           </strong>
+                           :{selectedReport.id}
+                        </p>
+                        <p className="font-medium">
+                           <strong className="text-gray-700 font-medium">
+                              URL
+                           </strong>
+                           :
+                           {selectedReport.token ? (
+                              <a
+                                 href={`http://localhost:5173/report?token=${selectedReport.token}`}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="text-blue-600 hover:underline ml-1"
+                              >
+                                 {selectedReport.token}
+                              </a>
+                           ) : (
+                              <span className="ml-1">없음</span>
+                           )}
+                        </p>
+                     </div>
+                  </div>
+               }
+               onClose={() => setSelectedReport(null)}
+               size="xl"
+            >
+               <ReportDetail
+                  report={selectedReport}
+                  fireStations={fireStations}
+                  onDispatch={handleDispatch}
+               />
+            </ModalWrapper>
          )}
       </div>
    );

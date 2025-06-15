@@ -120,7 +120,7 @@ export default function Sidebar({ isOpen }) {
             {menuGroups.map((group) => (
                <div key={group.title}>
                   {isOpen && (
-                     <div className="text-xs text-gray-500 uppercase px-4 mb-2">
+                     <div className="text-xs text-blue-400 uppercase px-4 mb-2 font-semibold">
                         {group.title}
                      </div>
                   )}
@@ -134,7 +134,7 @@ export default function Sidebar({ isOpen }) {
                                  "flex items-center gap-3 px-4 py-2 rounded-md transition";
                               const activeStyle = "bg-[#3E7EFF] text-white";
                               const hoverStyle =
-                                 "hover:bg-[#ECF2FF] hover:text-[#3E7EFF] text-gray-700";
+                                 "hover:bg-[#ECF2FF] hover:text-[#3E7EFF] text-gray-500 font-semibold";
 
                               return `${baseStyle} ${
                                  isActive ? activeStyle : hoverStyle

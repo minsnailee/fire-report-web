@@ -48,20 +48,20 @@ function getStatusBadgeColor(status) {
 }
 
 export default function ReportTable({ reports, onSelect }) {
-   const [showLatLng, setShowLatLng] = useState(false);
+   const [showReportDetail, setShowReportDetail] = useState(false);
 
    return (
       <div className="rounded-2xl border border-gray-200 bg-white">
          <div className="px-6 py-4 flex justify-between items-center">
             <h3 className="text-base font-medium text-gray-800">신고 목록</h3>
             <button
-               onClick={() => setShowLatLng((prev) => !prev)}
+               onClick={() => setShowReportDetail((prev) => !prev)}
                className="flex items-center gap-2 text-gray-600 hover:text-gray-650"
-               aria-label="위경도로 보기 토글"
+               aria-label="연락처 및 내용 보기 토글"
                type="button"
             >
-               <span className="text-sm select-none">위경도로 보기</span>
-               {showLatLng ? (
+               <span className="text-sm select-none">연락처 및 내용 보기</span>
+               {showReportDetail ? (
                   <LiaToggleOnSolid size={24} />
                ) : (
                   <LiaToggleOffSolid size={24} />
@@ -78,7 +78,8 @@ export default function ReportTable({ reports, onSelect }) {
                            <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
                               ID
                            </th>
-                           {!showLatLng && (
+
+                           {!showReportDetail && (
                               <>
                                  <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
                                     신고자 주소
@@ -88,19 +89,15 @@ export default function ReportTable({ reports, onSelect }) {
                                  </th>
                               </>
                            )}
-                           {showLatLng && (
+
+                           {showReportDetail && (
                               <>
+                                 {/* 기존 위경도 컬럼 대신 대체로 신고자 연락처, 메모 컬럼 표시 */}
                                  <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
-                                    신고자 위도
+                                    신고자 연락처
                                  </th>
-                                 <th className="px-6 py-4 text-center text-xs font-medium text-gray-500">
-                                    신고자 경도
-                                 </th>
-                                 <th className="px-6 py-4 text-center text-xs font-medium text-gray-900 bg-red-100">
-                                    화재 위도
-                                 </th>
-                                 <th className="px-6 py-4 text-center text-xs font-medium text-gray-900 bg-red-100">
-                                    화재 경도
+                                 <th className="px-6 py-4 text-center text-xs font-medium text-gray-900">
+                                    신고 내용
                                  </th>
                               </>
                            )}
@@ -124,7 +121,7 @@ export default function ReportTable({ reports, onSelect }) {
                                  {report.id}
                               </td>
 
-                              {!showLatLng && (
+                              {!showReportDetail && (
                                  <>
                                     <td className="text-center px-6 py-4 text-gray-700">
                                        {report.reporterAddress}
@@ -135,19 +132,13 @@ export default function ReportTable({ reports, onSelect }) {
                                  </>
                               )}
 
-                              {showLatLng && (
+                              {showReportDetail && (
                                  <>
                                     <td className="text-center px-6 py-4 text-gray-700">
-                                       {report.reporterLat.toFixed(4)}
+                                       {report.reporterPhone || "-"}
                                     </td>
-                                    <td className="text-center px-6 py-4 text-gray-700">
-                                       {report.reporterLng.toFixed(4)}
-                                    </td>
-                                    <td className="text-center px-6 py-4 bg-red-50 text-red-800 border-b border-b-white">
-                                       {report.fireLat.toFixed(4)}
-                                    </td>
-                                    <td className="text-center px-6 py-4 bg-red-50 text-red-800 border-b border-b-white">
-                                       {report.fireLng.toFixed(4)}
+                                    <td className="text-center px-6 py-4 text-red-800 border-b border-b-white whitespace-pre-wrap max-w-xs">
+                                       {report.memo || "-"}
                                     </td>
                                  </>
                               )}

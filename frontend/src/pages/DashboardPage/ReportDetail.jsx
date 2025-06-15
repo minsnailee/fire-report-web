@@ -3,26 +3,30 @@ import FireStationList from "./FireStationList";
 
 export default function ReportDetail({ report, fireStations, onDispatch }) {
    return (
-      <div className="mt-8">
-         <h3 className="text-xl font-semibold mb-2">
-            🗺️ 신고 위치 지도 보기 (ID: {report.id})
-         </h3>
-         <p>
-            🔑 <strong>토큰 :</strong> <code>{report.token ?? "없음"}</code>
-         </p>
-         <MapPreview
-            reporterLat={report.reporterLat}
-            reporterLng={report.reporterLng}
-            fireLat={report.fireLat}
-            fireLng={report.fireLng}
-         />
-         <FireStationList
-            fireLat={report.fireLat}
-            fireLng={report.fireLng}
-            stations={fireStations}
-            reportToken={report.token}
-            onDispatch={onDispatch}
-         />
+      <div>
+         {/* 지도 + 소방서 목록 양쪽 배치 */}
+         <div className="flex flex-col md:flex-row gap-4">
+            {/* 왼쪽: 지도 */}
+            <div className="w-full md:w-1/2">
+               <MapPreview
+                  reporterLat={report.reporterLat}
+                  reporterLng={report.reporterLng}
+                  fireLat={report.fireLat}
+                  fireLng={report.fireLng}
+               />
+            </div>
+
+            {/* 오른쪽: 소방서 목록 */}
+            <div className="w-full md:w-1/2 overflow-auto max-h-7xl">
+               <FireStationList
+                  fireLat={report.fireLat}
+                  fireLng={report.fireLng}
+                  stations={fireStations}
+                  reportToken={report.token}
+                  onDispatch={onDispatch}
+               />
+            </div>
+         </div>
       </div>
    );
 }
