@@ -107,6 +107,10 @@ public class FireReportEntity {
     @Column(name = "input_status", nullable = false)
     private ReportInputStatus inputStatus = ReportInputStatus.PENDING;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = true)
+    private FireReportStatus status;
+
     // 하나의 신고에 여러개 출동
     @OneToMany(mappedBy = "fireReport", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FireDispatchEntity> dispatches = new ArrayList<>();

@@ -86,9 +86,9 @@ public class FireReportController {
     }
 
     public List<FireReportDto> getReportedOnly() {
-    return fireReportService.getReportedReports()
-        .stream()
-        .map(FireReportDto::from)
-        .collect(Collectors.toList());
-}
+        return fireReportService.getReportedReports()
+            .stream()
+            .map(FireReportDto::from)
+            .collect(Collectors.toList());
+    }
 }
