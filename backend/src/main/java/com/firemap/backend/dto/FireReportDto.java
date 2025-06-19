@@ -72,6 +72,8 @@ public class FireReportDto {
 
     private String reporterPhone;
     private String reportContent;
+    
+    private FireReportStatus status;
 
     private ReportInputStatus inputStatus;
 
@@ -91,6 +93,7 @@ public class FireReportDto {
             .reporterPhone(report.getReporterPhone())
             .reportContent(report.getReportContent())
             .inputStatus(report.getInputStatus())
+            .status(report.getStatus())
             .build();
     }
 }

@@ -1,19 +1,19 @@
-package com.firemap.backend.service;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+// package com.firemap.backend.service;
+// import java.time.LocalDateTime;
+// import java.util.List;
+// import java.util.UUID;
+// import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Service;
-import com.firemap.backend.entity.*;
-import com.firemap.backend.enums.FireReportStatus;
-import com.firemap.backend.enums.ReportInputStatus;
-import com.firemap.backend.repository.*;
+// import org.springframework.stereotype.Service;
+// import com.firemap.backend.entity.*;
+// import com.firemap.backend.enums.FireReportStatus;
+// import com.firemap.backend.enums.ReportInputStatus;
+// import com.firemap.backend.repository.*;
 
 
-import jakarta.transaction.Transactional;
+// import jakarta.transaction.Transactional;
 
-import com.firemap.backend.dto.*;
+// import com.firemap.backend.dto.*;
 
 // @Service
 // @Transactional
@@ -146,6 +146,20 @@ import com.firemap.backend.dto.*;
 // }
 
 
+package com.firemap.backend.service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import com.firemap.backend.entity.*;
+import com.firemap.backend.enums.FireReportStatus;
+import com.firemap.backend.enums.ReportInputStatus;
+import com.firemap.backend.repository.*;
+
+import jakarta.transaction.Transactional;
+import com.firemap.backend.dto.*;
+
 @Service
 @Transactional
 public class FireReportService {
@@ -158,7 +172,7 @@ public class FireReportService {
         this.tokenRepository = tokenRepository;
     }
 
-    // 신고 접수 및 수정
+    // ✅ 신고 접수 및 수정
     public FireReportDto saveReport(FireReportRequest request) {
         FireReportTokenEntity token = tokenRepository.findByToken(request.getReportedId())
             .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 토큰입니다."));
@@ -178,6 +192,7 @@ public class FireReportService {
                 .reporterPhone(request.getReporterPhone())
                 .reportContent(request.getReportContent())
                 .inputStatus(ReportInputStatus.REPORTED)
+                .status(FireReportStatus.RECEIVED)
                 .build();
         } else {
             report.setReporterLat(request.getReporterLat());
@@ -191,70 +206,24 @@ public class FireReportService {
         }
 
         FireReportEntity saved = reportRepository.save(report);
-
-        return new FireReportDto(
-            saved.getId(),
-            token.getId(),
-            token.getToken(),
-            saved.getReporterLat(),
-            saved.getReporterLng(),
-            saved.getFireLat(),
-            saved.getFireLng(),
-            saved.getReporterAddress(),
-            saved.getFireAddress(),
-            saved.getReportedAt(),
-            saved.getReporterPhone(),
-            saved.getReportContent(),
-            saved.getInputStatus()
-        );
+        return FireReportDto.from(saved);  // ✅ 변경됨
     }
 
-    // 모든 신고 조회
+    // ✅ 모든 신고 조회
     public List<FireReportDto> getAllFireReports() {
-        return reportRepository.findAll().stream().map(report -> {
-            FireReportTokenEntity token = report.getReportToken();
-            return new FireReportDto(
-                report.getId(),
-                token.getId(),
-                token.getToken(),
-                report.getReporterLat(),
-                report.getReporterLng(),
-                report.getFireLat(),
-                report.getFireLng(),
-                report.getReporterAddress(),
-                report.getFireAddress(),
-                report.getReportedAt(),
-                report.getReporterPhone(),
-                report.getReportContent(),
-                report.getInputStatus()
-            );
-        }).collect(Collectors.toList());
+        return reportRepository.findAll().stream()
+            .map(FireReportDto::from)  // ✅ 변경됨
+            .toList();
     }
 
-    // 토큰으로 신고 조회
+    // ✅ 토큰으로 신고 조회
     public FireReportDto getReportByToken(String tokenStr) {
         FireReportEntity report = reportRepository.findByReportToken_Token(tokenStr)
             .orElseThrow(() -> new IllegalArgumentException("토큰에 해당하는 신고를 찾을 수 없습니다."));
-        FireReportTokenEntity token = report.getReportToken();
-
-        return new FireReportDto(
-            report.getId(),
-            token.getId(),
-            token.getToken(),
-            report.getReporterLat(),
-            report.getReporterLng(),
-            report.getFireLat(),
-            report.getFireLng(),
-            report.getReporterAddress(),
-            report.getFireAddress(),
-            report.getReportedAt(),
-            report.getReporterPhone(),
-            report.getReportContent(),
-            report.getInputStatus()
-        );
+        return FireReportDto.from(report);  // ✅ 변경됨
     }
 
-    // 신고자가 위치 입력 시 호출
+    // ✅ 신고자가 위치 입력 시 호출
     public void updateLocation(String token, FireReportRequest request) {
         FireReportTokenEntity tokenEntity = tokenRepository.findByToken(token)
             .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
@@ -269,13 +238,12 @@ public class FireReportService {
         report.setFireAddress(request.getFireAddress());
         report.setReporterAddress(request.getReporterAddress());
         report.setReportedAt(LocalDateTime.now());
-
-        // 여기서 상태를 PENDING → REPORTED 로 변경
         report.setInputStatus(ReportInputStatus.REPORTED);
 
         reportRepository.save(report);
     }
 
+    // ✅ REPORTED 상태인 신고만 조회
     public List<FireReportEntity> getReportedReports() {
         return reportRepository.findByInputStatus(ReportInputStatus.REPORTED);
     }
