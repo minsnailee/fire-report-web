@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.firemap.backend.dto.FireReportRequest;
+import com.firemap.backend.dto.FireStationDto;
 import com.firemap.backend.entity.FireReportEntity;
 import com.firemap.backend.dto.FireReportDto;
 import com.firemap.backend.service.FireReportService;
@@ -13,59 +14,16 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// @CrossOrigin(origins = "*")
-// @RestController
-// @RequestMapping("/api/fire-reports")
-// public class FireReportController {
-
-//     private final FireReportService fireReportService;
-
-//     public FireReportController(FireReportService svc) {
-//         this.fireReportService = svc;
-//     }
-
-//     // 신고 접수
-//     @PostMapping
-//     public FireReportDto createReport(@RequestBody FireReportRequest request) {
-//         System.out.println("Request status: " + request.getStatus());
-//         System.out.println("Request reportedId: " + request.getReportedId());
-//         System.out.println("Request reportedAt: " + request.getReportedAt());
-//         return fireReportService.saveReport(request);
-//     }
-
-//     // 모든 신고 조회
-//     @GetMapping
-//     public List<FireReportDto> getFireReports() {
-//         return fireReportService.getAllFireReports();
-//     }
-
-//     // 출동지시
-//     @PatchMapping("/{id}/dispatch")
-//     public ResponseEntity<String> dispatchFireReport(@PathVariable Long id) {
-//         FireReportEntity report = fireReportService.dispatchReport(id);
-//         String token = report.getReportToken().getToken();
-//         return ResponseEntity.ok(token);
-//     }
-
-//     // 토큰으로 신고 조회
-//     @GetMapping("/by-token/{token}")
-//     public FireReportDto getReportByToken(@PathVariable String token) {
-//         return fireReportService.getReportByToken(token);
-//     }
-// }
-
-
+import com.firemap.backend.service.FireStationService;
 
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/fire-reports")
+@RequiredArgsConstructor
 public class FireReportController {
 
     private final FireReportService fireReportService;
-
-    public FireReportController(FireReportService fireReportService) {
-        this.fireReportService = fireReportService;
-    }
+    private final FireStationService fireStationService;
 
     // 신고 접수 (신고 생성 및 수정)
     @PostMapping
@@ -90,5 +48,12 @@ public class FireReportController {
             .stream()
             .map(FireReportDto::from)
             .collect(Collectors.toList());
+    }
+
+    // 신고 기준으로 소방서 상태 조회
+    @GetMapping("/{reportId}/stations-with-status")
+    public ResponseEntity<List<FireStationDto>> getStationsWithStatusByReport(@PathVariable Long reportId) {
+        List<FireStationDto> stations = fireStationService.getStationsWithStatus(reportId);
+        return ResponseEntity.ok(stations);
     }
 }

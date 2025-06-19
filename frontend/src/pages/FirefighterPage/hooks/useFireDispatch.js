@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 
-export default function useFireDispatch(token, fireStationId) {
+export default function useFireDispatch(
+    token,
+    fireStationId,
+    routePriority = "RECOMMEND"
+) {
     const [searchParams] = useSearchParams();
     const dispatchId = searchParams.get("dispatchId");
 
@@ -175,15 +179,15 @@ export default function useFireDispatch(token, fireStationId) {
                     return dist <= 500;
                 });
 
-                //  nearbyHydrants.forEach((h) =>
-                //      createImageMarker(
-                //          h.lat,
-                //          h.lng,
-                //          "/hydrant-marker.svg",
-                //          24,
-                //          hydrantZIndex
-                //      )
-                //  );
+                nearbyHydrants.forEach((h) =>
+                    createImageMarker(
+                        h.lat,
+                        h.lng,
+                        "/hydrant-marker.svg",
+                        24,
+                        hydrantZIndex
+                    )
+                );
 
                 //  nearbyHydrants.forEach((h) => {
                 //      const marker = createImageMarker(
@@ -214,7 +218,7 @@ export default function useFireDispatch(token, fireStationId) {
                 const params = new URLSearchParams({
                     origin: `${fireStation.longitude},${fireStation.latitude}`,
                     destination: `${report.fireLng},${report.fireLat}`,
-                    priority: "RECOMMEND",
+                    priority: routePriority,
                     car_type: 5,
                 });
 
@@ -260,6 +264,25 @@ export default function useFireDispatch(token, fireStationId) {
                             path.push(fireLatLng);
                         }
 
+                        // const polyline = new kakao.maps.Polyline({
+                        //     map: mapInstance,
+                        //     path,
+                        //     strokeWeight: 5,
+                        //     strokeColor: color,
+                        //     strokeOpacity: 1,
+                        //     strokeStyle: "solid",
+                        // });
+
+                        // newPolylines.push(polyline);
+                        const backgroundLine = new kakao.maps.Polyline({
+                            map: mapInstance,
+                            path,
+                            strokeWeight: 9,
+                            strokeColor: "#999999",
+                            strokeOpacity: 1,
+                            strokeStyle: "solid",
+                        });
+
                         const polyline = new kakao.maps.Polyline({
                             map: mapInstance,
                             path,
@@ -269,6 +292,7 @@ export default function useFireDispatch(token, fireStationId) {
                             strokeStyle: "solid",
                         });
 
+                        newPolylines.push(backgroundLine);
                         newPolylines.push(polyline);
                     });
                 });
@@ -283,7 +307,7 @@ export default function useFireDispatch(token, fireStationId) {
             document.head.removeChild(script);
             polylines.forEach((pl) => pl.setMap(null));
         };
-    }, [report, fireStation, hydrants]);
+    }, [report, fireStation, hydrants, routePriority]);
 
     return {
         report,
