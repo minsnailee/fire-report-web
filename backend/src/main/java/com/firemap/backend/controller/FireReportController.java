@@ -12,6 +12,7 @@ import com.firemap.backend.service.FireReportService;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.firemap.backend.service.FireStationService;
@@ -55,5 +56,12 @@ public class FireReportController {
     public ResponseEntity<List<FireStationDto>> getStationsWithStatusByReport(@PathVariable Long reportId) {
         List<FireStationDto> stations = fireStationService.getStationsWithStatus(reportId);
         return ResponseEntity.ok(stations);
+    }
+
+    // 상태 카운트
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Long>> getStats() {
+        Map<String, Long> stats = fireReportService.getFireReportStats();
+        return ResponseEntity.ok(stats);
     }
 }

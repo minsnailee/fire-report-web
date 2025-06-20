@@ -3,12 +3,10 @@ package com.firemap.backend.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 import com.firemap.backend.entity.FireReportEntity;
-import com.firemap.backend.entity.FireReportTokenEntity;
 import com.firemap.backend.enums.FireReportStatus;
 import com.firemap.backend.enums.ReportInputStatus;
 

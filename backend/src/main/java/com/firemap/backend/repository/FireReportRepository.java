@@ -5,8 +5,10 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.firemap.backend.entity.FireReportEntity;
 import com.firemap.backend.entity.FireReportTokenEntity;
+import com.firemap.backend.enums.FireReportStatus;
 import com.firemap.backend.enums.ReportInputStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,4 +39,8 @@ public interface FireReportRepository extends JpaRepository<FireReportEntity, Lo
     List<FireReportEntity> findAllWithToken();
 
     List<FireReportEntity> findByInputStatus(ReportInputStatus inputStatus);
+
+    // 상태 카운트
+    long countByReportedAtBetween(LocalDateTime start, LocalDateTime end);
+    long countByStatus(FireReportStatus status);
 }
