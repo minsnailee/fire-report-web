@@ -40,7 +40,11 @@ public interface FireReportRepository extends JpaRepository<FireReportEntity, Lo
 
     List<FireReportEntity> findByInputStatus(ReportInputStatus inputStatus);
 
+    @Query("SELECT fr FROM FireReportEntity fr WHERE fr.fireLat IS NOT NULL AND fr.fireLng IS NOT NULL AND fr.inputStatus = 'REPORTED'")
+    List<FireReportEntity> findAllReportedWithLocation();
+
     // 상태 카운트
     long countByReportedAtBetween(LocalDateTime start, LocalDateTime end);
     long countByStatus(FireReportStatus status);
+    long countByStatusIn(List<FireReportStatus> statuses);
 }

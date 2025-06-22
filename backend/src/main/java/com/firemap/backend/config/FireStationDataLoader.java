@@ -20,6 +20,11 @@ public class FireStationDataLoader {
 
     @PostConstruct
     public void loadData() {
+        if (fireStationRepository.count() > 0) {
+            System.out.println("소방서 데이터는 이미 존재합니다. 추가 로딩 생략.");
+            return;
+        }
+
         try (BufferedReader br = new BufferedReader(new InputStreamReader(
                 getClass().getResourceAsStream("/gwangju_fire_station_utf-8.csv"), StandardCharsets.UTF_8))) {
 
