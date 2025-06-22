@@ -4,17 +4,27 @@ function ChatMessageList({ messages, endRef }) {
             {messages.map((msg) => (
                 <div
                     key={msg.id}
-                    className={`max-w-[75%] p-2 rounded ${
-                        msg.sender === "bot"
-                            ? "bg-blue-100 self-start"
-                            : "bg-green-100 self-end"
+                    className={`flex ${
+                        msg.sender === "bot" ? "justify-end" : "justify-start"
                     }`}
                 >
-                    {msg.text}
+                    <div
+                        className={`max-w-[75%] p-2 rounded ${
+                            msg.sender === "bot"
+                                ? "bg-blue-100"
+                                : "bg-green-100"
+                        }`}
+                    >
+                        <p className="text-base whitespace-pre-wrap leading-relaxed">
+                            {msg.text}
+                        </p>
+                    </div>
                 </div>
             ))}
+
             <div ref={endRef} />
         </main>
     );
 }
+
 export default ChatMessageList;
