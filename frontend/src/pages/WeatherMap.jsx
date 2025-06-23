@@ -156,14 +156,13 @@ const WindMap = () => {
                     const vec = weather.VEC || "0";
                     const speed = parseFloat(weather.WSD || "0");
                     const isRain = weather.PTY && weather.PTY !== "0";
-                    // const baseDistanceKm = isRain
-                    //     ? 0.05
-                    //     : 0.1 + 0.02 * (index + 1);
-
-                    // 풍속 기반 거리 계산식 적용
+                    // 풍속 거리 기반 계산식
                     const baseDistanceKm = isRain
                         ? 0.05
-                        : Math.min(0.5, speed * 0.02 * (index + 1)); // 예: 3m/s * 0.02 * 3 = 0.18km
+                        : Math.max(
+                              0.03, // 단계별 최소 거리
+                              Math.min(0.5, speed * 0.02 * (index + 1)) // 화재 확산 반경 = 풍속 × 계수(0.02) × 시간단계 + 보정값
+                          );
 
                     const center =
                         index === 0
@@ -174,7 +173,14 @@ const WindMap = () => {
                                   vec,
                                   baseDistanceKm * index
                               );
-
+                    console.log(
+                        `${fire.address} - step: ${
+                            index + 1
+                        }, speed: ${speed}, distanceKm: ${baseDistanceKm.toFixed(
+                            3
+                        )}, center:`,
+                        center
+                    );
                     stepCircles.push({
                         step: index + 1,
                         center,
@@ -263,7 +269,7 @@ const WindMap = () => {
 
     return (
         <DashboardLayout>
-            <div className="relative w-full h-[80vh]">
+            <div className="overflow-hidden relative w-full h-[80vh] border rounded-2xl">
                 {loading ? (
                     <div className="flex items-center justify-center h-full flex-col animate-pulse text-gray-500">
                         <div className="w-12 h-12 mb-4 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -427,6 +433,93 @@ const WindMap = () => {
                                                 />
                                             )
                                         )}
+                                        {/* 전체 영향 범위 원 (step 최대 기준) */}
+                                        {(() => {
+                                            if (
+                                                !fire.stepCircles?.length ||
+                                                currentStep <= 1
+                                            )
+                                                return null;
+
+                                            // 화재 중심
+                                            const centerLat = fire.lat;
+                                            const centerLon = fire.lon;
+
+                                            // 거리 계산 함수 (Haversine)
+                                            const getDistanceKm = (
+                                                lat1,
+                                                lon1,
+                                                lat2,
+                                                lon2
+                                            ) => {
+                                                const R = 6371;
+                                                const dLat =
+                                                    ((lat2 - lat1) * Math.PI) /
+                                                    180;
+                                                const dLon =
+                                                    ((lon2 - lon1) * Math.PI) /
+                                                    180;
+                                                const a =
+                                                    Math.sin(dLat / 2) ** 2 +
+                                                    Math.cos(
+                                                        (lat1 * Math.PI) / 180
+                                                    ) *
+                                                        Math.cos(
+                                                            (lat2 * Math.PI) /
+                                                                180
+                                                        ) *
+                                                        Math.sin(dLon / 2) ** 2;
+                                                const c =
+                                                    2 *
+                                                    Math.atan2(
+                                                        Math.sqrt(a),
+                                                        Math.sqrt(1 - a)
+                                                    );
+                                                return R * c;
+                                            };
+
+                                            // 가장 바깥에 있는 원 찾기 (거리 + 반지름)
+                                            const maxOuterRadiusKm =
+                                                fire.stepCircles
+                                                    .filter(
+                                                        (s) =>
+                                                            s.step <=
+                                                            currentStep
+                                                    )
+                                                    .reduce((max, s) => {
+                                                        const dist =
+                                                            getDistanceKm(
+                                                                centerLat,
+                                                                centerLon,
+                                                                s.center[0],
+                                                                s.center[1]
+                                                            );
+                                                        return Math.max(
+                                                            max,
+                                                            dist +
+                                                                s.radius / 1000
+                                                        ); // radius는 m 단위니까 km로 나눔
+                                                    }, 0);
+
+                                            return (
+                                                <Circle
+                                                    center={[
+                                                        centerLat,
+                                                        centerLon,
+                                                    ]}
+                                                    radius={
+                                                        maxOuterRadiusKm *
+                                                        1000 *
+                                                        1.03
+                                                    }
+                                                    pathOptions={{
+                                                        stroke: false,
+                                                        fillColor: "#000000",
+                                                        fillOpacity: 0.08,
+                                                    }}
+                                                />
+                                            );
+                                        })()}
 
                                         {/* 누적 원 */}
                                         {fire.stepCircles
