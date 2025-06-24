@@ -20,14 +20,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import org.springframework.beans.factory.annotation.Value;
-
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class WeatherController {
-    @Value("${weather.api.key}")
-    private String weatherApiKey;
 
     @Autowired
     private FireReportRepository fireReportRepository;
@@ -97,7 +93,7 @@ public class WeatherController {
     // 캐시 가능한 메서드로 분리
     @Cacheable(value = "weatherCache", key = "#baseDate + '_' + #baseTime + '_' + #nx + '_' + #ny")
     public Map<String, Map<String, String>> fetchHourlyWeather(String baseDate, String baseTime, int nx, int ny) throws Exception {
-        String apiKey = weatherApiKey;
+        String apiKey = "ytCyyNGSl1oComuubu0zT%2FVckVg0s4iSAqTsYLLA8rj2Zdh8Zbt8CF4gaIXNQSFigQ0SJ%2FJdvTLBYOonwzg2kw%3D%3D";
         String urlStr = String.format(
             "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?serviceKey=%s&pageNo=1&numOfRows=1000&dataType=JSON&base_date=%s&base_time=%s&nx=%d&ny=%d",
             apiKey, baseDate, baseTime, nx, ny
