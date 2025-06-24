@@ -14,6 +14,8 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import React from "react";
 import windyArrow from "/windy-arrow-red.svg";
 import { FaStop, FaPause, FaPlay } from "react-icons/fa";
+import { RiArrowDownSLine } from "react-icons/ri";
+import { RiArrowUpSLine } from "react-icons/ri";
 
 function getWindDirectionText(deg) {
     const dirs = [
@@ -121,6 +123,7 @@ const WeatherMap = () => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const playIntervalRef = useRef(null);
+    const [isListOpen, setIsListOpen] = useState(true);
 
     const fetchData = async () => {
         setLoading(true);
@@ -367,6 +370,52 @@ const WeatherMap = () => {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* 화재 목록 토글 박스 (왼쪽 하단) */}
+                        <div className="absolute bottom-4 left-4 z-[1000]">
+                            {isListOpen ? (
+                                <div className="w-[300px] h-[300px] overflow-y-auto bg-white rounded-lg shadow-md border text-sm">
+                                    <div className="flex justify-between items-center p-2 border-b bg-gray-100">
+                                        <span className="font-semibold">
+                                            화재 목록
+                                        </span>
+                                        <button
+                                            onClick={() => setIsListOpen(false)}
+                                            className="text-xs text-gray-500 hover:text-gray-800"
+                                        >
+                                            <RiArrowDownSLine size={24} />
+                                        </button>
+                                    </div>
+                                    <ul>
+                                        {firesWithSteps.map((fire, idx) => (
+                                            <li
+                                                key={idx}
+                                                onClick={() =>
+                                                    setActiveFire(fire)
+                                                }
+                                                className={`px-3 py-2 border-b cursor-pointer hover:bg-blue-50 ${
+                                                    activeFire?.lat ===
+                                                        fire.lat &&
+                                                    activeFire?.lon === fire.lon
+                                                        ? "bg-blue-100"
+                                                        : ""
+                                                }`}
+                                            >
+                                                {fire.address}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setIsListOpen(true)}
+                                    className="flex gap-2 items-center bg-white border rounded-full shadow px-3 py-1 text-sm hover:bg-gray-100"
+                                >
+                                    화재 목록
+                                    <RiArrowUpSLine size={20} />
+                                </button>
+                            )}
                         </div>
 
                         {/* 정보 패널 */}
